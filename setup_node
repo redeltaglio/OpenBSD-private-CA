@@ -11,7 +11,12 @@ set -o nounset
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
 
-if [[ $# -eq 0 ]];then
+if [[ $UID -ne 0 ]]; then
+	print $0 "you've got to run $0 as UID=0 \n"
+	exit 1
+fi
+
+if [[ $# -eq 0 ]]; then
 	print $0 "have to be used with the following options \
 			\n \
 			\ninstall -> create SSH and SSL private CA \
