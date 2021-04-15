@@ -15,8 +15,8 @@ if [[ $# -eq 0 ]];then
 	print $0 "have to be used with the following options \
 			\n \
 			\ninstall -> create SSH and SSL private CA \
-			\nverify -> printout and verify certificates \
-			\nreset -> reset filesystem hierarchy and delete certificates and keys \
+			\nverify  -> printout and verify certificates \
+			\nreset   -> reset filesystem hierarchy and delete certificates and keys \
 			\n"
 	
 	exit 1
@@ -49,7 +49,7 @@ case $1 in
 	"reset")
 		;;
 	*)
-		print $0 "unknown option"
+		print $0 "unknown option \n"
 		exit 1
 		;;
 esac
