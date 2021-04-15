@@ -55,6 +55,8 @@ case $1 in
 		ssh-keygen -L -f /etc/ssh/ca/host/{}/ssh_host_ed25519_key-cert.pub
 		;;
 	"reset")
+		rm -rf /etc/ssh/
+		mkdir -pm 755 /etc/ssh/ca/{.ssh,host}
 		;;
 	*)
 		print $0 "unknown option \n"
