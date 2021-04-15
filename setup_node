@@ -37,11 +37,12 @@ app=$(basename $0)
 hostname=$(hostname -s)
 domainname=$(hostname | sed "s/$(hostname -s).//")
 
-cd "src/etc/ssh/ca/host"
+
 case $1 in
 	"install")
 		echo -n "creating SSH CA \n"
 		mkdir -pm 755 /etc/ssh/ca/{.ssh,host}
+		cd "src/etc/ssh/ca/host"
 		cp -R * /etc/ssh/ca/host/
 		echo -n "creating SSH CA key with password \
 			\nplease use keypass to store it
@@ -58,8 +59,9 @@ case $1 in
 		ssh-keygen -L -f /etc/ssh/ca/host/{}/ssh_host_ed25519_key-cert.pub
 		;;
 	"reset")
-		rm -rf /etc/ssh/
+		rm -rf /etc/ssh/ca/
 		mkdir -pm 755 /etc/ssh/ca/{.ssh,host}
+		mkdir -pm 755 /etc/ssh/ca/user/taglio
 		;;
 	*)
 		print $0 "unknown option \n"
