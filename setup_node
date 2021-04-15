@@ -2,7 +2,7 @@
 
 #	$Telecomlobby: setup_node,v 0.1 11/3/2021 21:01:04 taglio$
 #
-#sshd: https://github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md	
+#sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md	
 
 
 set -o errexit
@@ -36,42 +36,47 @@ function error_exit {
 
 app=$(basename $0)
 hostname=$(hostname -s)
-domainname=$(hostname | sed "s/$(hostname -s).//")
+domainname=$(hostname | sed "s/$(hostname -s)./")
 
+SYSDIR="$SYSDIR"
 
 case $1 in
 	"install")
 		echo -n "creating SSH CA \n"
-		mkdir -pm 755 /etc/ssh/ca/{.ssh,host}
-		cd "src/etc/ssh/ca/host"
-		cp -R * /etc/ssh/ca/host/
+		mkdir -pm 755 $SYSDIR/{,host}
+		cd "src$SYSDIR/host"
+		cp -R * $SYSDIR/host/
 		echo -n "creating SSH CA key with password \
 			\nplease use keypass to store it
 			\n"
-		ssh-keygen -t ed25519 -C "$hostname@$domainname" -f /etc/ssh/ca/.ssh/ssh_ca_ed25519
+		ssh-keygen -t ed25519 -C "$hostname@$domainname" -f $SYSDIR/ssh_ca_ed25519
 		echo -n "put the same password for:\n"
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
-			ssh-keygen -s /etc/ssh/ca/.ssh/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 /etc/ssh/ca/host/{}/ssh_host_ed25519_key.pub
-		cp /etc/ssh/ca/host/*/*.pub CA_SSH_cert/
+			ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
+		
 		;;
 	"verify")
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
-		ssh-keygen -L -f /etc/ssh/ca/host/{}/ssh_host_ed25519_key-cert.pub
-		
-		ssh-keygen -Q -f /etc/ssh/ca/ssh_ca.krl /etc/ssh/ca/user/taglio/.ssh/id_ed25519-cert.pub
+		ssh-keygen -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
+		ssh-keygen -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/taglio/id_ed25519-cert.pub
 		;;
 	"reset")
-		rm -rf /etc/ssh/ca/
-		mkdir -pm 755 /etc/ssh/ca/{.ssh,host}
-		mkdir -pm 755 /etc/ssh/ca/user/taglio
+		rm -rf $SYSDIR/
+		mkdir -pm 755 $SYSDIR/host
+		mkdir -pm 755 $SYSDIR/user/taglio
 		;;
 	"users")
+		cd src$SYSDIR/user/taglio/
+		install -o root -g wheel -m 0750 -b user/taglio/id_ed25519.pub $SYSDIR/user/taglio/ 
+		echo -n "creating user certificate using wheel group \n"
+		ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -I puffy -n wheel \
+        		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/taglio/id_ed25519.pub
 		echo -n "creating SSH KRL revocation list \
 		\nyou must have created the user certificate in your workstation \
 		\n with the utility workstation_create_pass_key_ssh_ca.sh \
 		\n"
-		ssh-keygen -k -f /etc/ssh/ca/ssh_ca.krl -s /etc/ssh/ca/.ssh/ssh_ca_ed25519.pub -z 2 /etc/ssh/ca/user/taglio/id_ed25519-cert.pub
+		ssh-keygen -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/taglio/id_ed25519-cert.pub
 		;;
 	*)
 		print $0 "unknown option \n"
