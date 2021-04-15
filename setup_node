@@ -29,6 +29,7 @@ function error_exit {
 
 app=$(basename $0)
 hostname=$(hostname -s)
+domainname=$(hostname | sed "s/$(hostname -s).//")
 
 case $1 in
 	"install")
@@ -39,12 +40,14 @@ case $1 in
 		echo -n "creating SSH CA key with password \
 			\nplease use keypass to store it
 			\n"
-		ssh-keygen -t ed25519 -C "$hostname@telecom.lobby" -f /etc/ssh/ca/.ssh/ssh_ca_ed25519
+		ssh-keygen -t ed25519 -C "$hostname@$domainname" -f /etc/ssh/ca/.ssh/ssh_ca_ed25519
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
 			ssh-keygen -s /etc/ssh/ca/.ssh/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 /etc/ssh/ca/host/{}/ssh_host_ed25519_key.pub
 
 		;;
 	"verify")
+		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
+		ssh-keygen -L -f /etc/ssh/ca/host/{}/ssh_host_ed25519_key-cert.pub
 		;;
 	"reset")
 		;;
