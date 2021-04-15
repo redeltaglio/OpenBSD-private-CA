@@ -23,6 +23,7 @@ if [[ $# -eq 0 ]]; then
 			\ninstall -> create SSH and SSL private CA \
 			\nverify  -> printout and verify certificates \
 			\nreset   -> reset filesystem hierarchy and delete certificates and keys \
+			\nusers   -> create KRL to revoke a user certificate. Default taglio \
 			\n"
 	
 	exit 1
@@ -52,17 +53,24 @@ case $1 in
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
 			ssh-keygen -s /etc/ssh/ca/.ssh/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 /etc/ssh/ca/host/{}/ssh_host_ed25519_key.pub
-
 		;;
 	"verify")
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
 		ssh-keygen -L -f /etc/ssh/ca/host/{}/ssh_host_ed25519_key-cert.pub
+		
+		ssh-keygen -Q -f /etc/ssh/ca/ssh_ca.krl /etc/ssh/ca/user/taglio/.ssh/id_ed25519-cert.pub
 		;;
 	"reset")
 		rm -rf /etc/ssh/ca/
 		mkdir -pm 755 /etc/ssh/ca/{.ssh,host}
 		mkdir -pm 755 /etc/ssh/ca/user/taglio
 		;;
+	"users")
+		echo -n "creating SSH KRL revocation list \
+		\nyou must have created the user certificate in your workstation \
+		\n with the utility workstation_create_pass_key_ssh_ca.sh \
+		\n"
+		ssh-keygen -k -f /etc/ssh/ca/ssh_ca.krl -s /etc/ssh/ca/.ssh/ssh_ca_ed25519.pub -z 2 /etc/ssh/ca/user/taglio/id_ed25519-cert.pub
 	*)
 		print $0 "unknown option \n"
 		exit 1
