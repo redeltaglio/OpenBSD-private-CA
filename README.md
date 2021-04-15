@@ -1,4 +1,4 @@
-# OpenBSD-private-CA
+# OpenBSD SSH and SSL CA server
 ![img](https://learnbchs.org/puffy.png)
 
 
