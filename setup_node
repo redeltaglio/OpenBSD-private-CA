@@ -47,8 +47,9 @@ case $1 in
 			\nplease use keypass to store it
 			\n"
 		ssh-keygen -t ed25519 -C "$hostname@$domainname" -f /etc/ssh/ca/.ssh/ssh_ca_ed25519
+		echo -n "put password for:\n"
+		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
-			echo -n "insert password for" && echo -n {} && echo -n "\n" && \
 			ssh-keygen -s /etc/ssh/ca/.ssh/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 /etc/ssh/ca/host/{}/ssh_host_ed25519_key.pub
 
 		;;
