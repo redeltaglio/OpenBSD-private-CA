@@ -10,6 +10,7 @@ set -o nounset
 
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
+SYSDIR="/etc/ssh/ca"
 UID=$(id -u)
 
 if [[ $UID -ne 0 ]]; then
@@ -38,45 +39,56 @@ app=$(basename $0)
 hostname=$(hostname -s)
 domainname=$(hostname | sed "s/$(hostname -s)./")
 
-SYSDIR="$SYSDIR"
+$INSTALL=/usr/bin/install
+RCCTL=/usr/sbin/rcctl
+USERADD=/usr/sbin/useradd
+PKG_ADD=/usr/sbin/pkg_add
+PFCTL=/sbin/pfctl
+SH=/bin/ksh
+GETENT=/usr/bin/getent
+SSHKEYGEN=/usr/bin/ssh-keygen
+DOAS=/usr/bin/doas
+WGET=/usr/local/bin/wget
+CHOWN=/sbin/chown
+FIND=/usr/bin/find
+MKDIR=/bin/mkdir
 
 case $1 in
 	"install")
 		echo -n "creating SSH CA \n"
-		mkdir -pm 755 $SYSDIR/{,host}
+		$MKDIR -pm 755 $SYSDIR/{,host}
 		cd "src$SYSDIR/host"
 		cp -R * $SYSDIR/host/
 		echo -n "creating SSH CA key with password \
 			\nplease use keypass to store it
 			\n"
-		ssh-keygen -t ed25519 -C "$hostname@$domainname" -f $SYSDIR/ssh_ca_ed25519
+		$SSHKEYGEN -t ed25519 -C "$hostname@$domainname" -f $SYSDIR/ssh_ca_ed25519
 		echo -n "put the same password for:\n"
-		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2
-		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
-			ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
-		
+		$FIND . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2
+		$FIND . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
+			$SSHKEYGEN -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
 		;;
 	"verify")
-		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
-		ssh-keygen -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
-		ssh-keygen -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/taglio/id_ed25519-cert.pub
+		$FIND . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
+		$SSHKEYGEN -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
+		$SSHKEYGEN -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/taglio/id_ed25519-cert.pub
 		;;
 	"reset")
 		rm -rf $SYSDIR/
-		mkdir -pm 755 $SYSDIR/host
-		mkdir -pm 755 $SYSDIR/user/taglio
+		$MKDIR -pm 755 $SYSDIR/host
+		$MKDIR -pm 755 $SYSDIR/user/taglio
 		;;
 	"users")
-		cd src$SYSDIR/user/taglio/
-		install -o root -g wheel -m 0750 -b user/taglio/id_ed25519.pub $SYSDIR/user/taglio/ 
+		cd "src$SYSDIR/user/taglio/"
+		$INSTALL -o root -g wheel -m 0750 -b user/taglio/id_ed25519.pub $SYSDIR/user/taglio/ 
 		echo -n "creating user certificate using wheel group \n"
-		ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -I puffy -n wheel \
+		$SSHKEYGEN -s $SYSDIR/ssh_ca_ed25519 -I puffy -n wheel \
         		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/taglio/id_ed25519.pub
 		echo -n "creating SSH KRL revocation list \
 		\nyou must have created the user certificate in your workstation \
 		\n with the utility workstation_create_pass_key_ssh_ca.sh \
 		\n"
-		ssh-keygen -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/taglio/id_ed25519-cert.pub
+		$SSHKEYGEN -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/taglio/id_ed25519-cert.pub
 		;;
 	*)
 		print $0 "unknown option \n"
