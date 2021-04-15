@@ -1,0 +1,23 @@
+#!/bin/ksh
+
+#	$Telecomlobby: setup_node,v 0.1 11/3/2021 21:01:04 taglio$
+#
+#sshd: https://github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md	
+
+
+set -o errexit
+set -o nounset
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
+
+function error_exit {
+    echo "${app}: ${1:-"Unknown Error"}" 1>&2
+    exit 1
+}
+
+app=$(basename $0)
+
+echo -n "creating SSH CA \
+	 \ncopying filesystem hierarchy"
+cd "src/etc/ssh/ca/host"
+find . -type d | xargs -I {} install -o root -g wheel -m 0640  -d {} /etc/ssh/ca/host/{}
