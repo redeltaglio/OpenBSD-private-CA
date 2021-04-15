@@ -80,8 +80,8 @@ case $1 in
 		$MKDIR -pm 755 $SYSDIR/user/taglio
 		;;
 	"users")
-		cd "src$SYSDIR/user/taglio/"
-		$INSTALL -o root -g wheel -m 0750 -b user/taglio/id_ed25519.pub $SYSDIR/user/taglio/ 
+		cd src/etc/ssh/ca/user/taglio/
+		$INSTALL -o root -g wheel -m 0750 -b id_ed25519.pub $SYSDIR/user/taglio/ 
 		echo -n "creating user certificate using wheel group \n"
 		$SSHKEYGEN -s $SYSDIR/ssh_ca_ed25519 -I puffy -n wheel \
         		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/taglio/id_ed25519.pub
