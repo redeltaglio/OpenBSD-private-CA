@@ -9,8 +9,8 @@ Reverse a private server, kvm instance, docker or another container for this typ
 
 ```shell
 taglio@cyberanarkhia:/home/taglio$ uname -a
-OpenBSD cyberanarkhia.telecom.lobby 6.7 GENERIC.MP#2 macppc
-taglio@cyberanarkhia:/home/taglio$
+OpenBSD cyberanarkhia.telecom.lobby 6.8 GENERIC.MP#3 macppc
+taglio@cyberanarkhia:/home/taglio$ 
 ```
 
 #### SSH
