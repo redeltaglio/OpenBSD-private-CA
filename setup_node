@@ -37,9 +37,9 @@ function error_exit {
 
 app=$(basename $0)
 hostname=$(hostname -s)
-domainname=$(hostname | sed "s/$(hostname -s)./")
+domainname=$(hostname | sed "s/$(hostname -s).//")
 
-$INSTALL=/usr/bin/install
+INSTALL=/usr/bin/install
 RCCTL=/usr/sbin/rcctl
 USERADD=/usr/sbin/useradd
 PKG_ADD=/usr/sbin/pkg_add
@@ -69,6 +69,7 @@ case $1 in
 			$SSHKEYGEN -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
 		;;
 	"verify")
+		cd $SYSDIR
 		$FIND . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
 		$SSHKEYGEN -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
 		$SSHKEYGEN -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/taglio/id_ed25519-cert.pub
