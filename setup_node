@@ -13,6 +13,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
 
 if [[ $# -eq 0 ]];then
 	print $0 "have to be used with the following options \
+			\n \
 			\ninstall -> create SSH and SSL private CA \
 			\nverify -> printout and verify certificates \
 			\nreset -> reset filesystem hierarchy and delete certificates and keys \
