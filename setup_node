@@ -15,8 +15,8 @@ if [[ $# -eq 0 ]];then
 	print $0 "have to be used with the following options \
 			\n \
 			\ninstall -> create SSH and SSL private CA \
-			\nverify -> printout and verify certificates \
-			\nreset -> reset filesystem hierarchy and delete certificates and keys \
+			\nverify  -> printout and verify certificates \
+			\nreset   -> reset filesystem hierarchy and delete certificates and keys \
 			\n"
 	
 	exit 1
@@ -29,6 +29,7 @@ function error_exit {
 
 app=$(basename $0)
 hostname=$(hostname -s)
+domainname=$(hostname | sed "s/$(hostname -s).//")
 
 case $1 in
 	"install")
@@ -39,17 +40,19 @@ case $1 in
 		echo -n "creating SSH CA key with password \
 			\nplease use keypass to store it
 			\n"
-		ssh-keygen -t ed25519 -C "$hostname@telecom.lobby" -f /etc/ssh/ca/.ssh/ssh_ca_ed25519
+		ssh-keygen -t ed25519 -C "$hostname@$domainname" -f /etc/ssh/ca/.ssh/ssh_ca_ed25519
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
 			ssh-keygen -s /etc/ssh/ca/.ssh/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 /etc/ssh/ca/host/{}/ssh_host_ed25519_key.pub
 
 		;;
 	"verify")
+		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
+		ssh-keygen -L -f /etc/ssh/ca/host/{}/ssh_host_ed25519_key-cert.pub
 		;;
 	"reset")
 		;;
 	*)
-		print $0 "unknown option"
+		print $0 "unknown option \n"
 		exit 1
 		;;
 esac
