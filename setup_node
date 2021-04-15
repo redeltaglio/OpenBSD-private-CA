@@ -37,11 +37,11 @@ app=$(basename $0)
 hostname=$(hostname -s)
 domainname=$(hostname | sed "s/$(hostname -s).//")
 
+cd "src/etc/ssh/ca/host"
 case $1 in
 	"install")
 		echo -n "creating SSH CA \n"
 		mkdir -pm 755 /etc/ssh/ca/{.ssh,host}
-		cd "src/etc/ssh/ca/host"
 		cp -R * /etc/ssh/ca/host/
 		echo -n "creating SSH CA key with password \
 			\nplease use keypass to store it
