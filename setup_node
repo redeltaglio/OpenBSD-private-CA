@@ -11,7 +11,15 @@ set -o nounset
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
 
-
+if [[ $# -eq 0 ]];then
+	print $0 "have to be used with the following options \
+			\ninstall -> create SSH and SSL private CA \
+			\nverify -> printout and verify certificates \
+			\nreset -> reset filesystem hierarchy and delete certificates and keys \
+			\n"
+	
+	exit 1
+fi
 
 function error_exit {
     echo "${app}: ${1:-"Unknown Error"}" 1>&2
@@ -21,14 +29,29 @@ function error_exit {
 app=$(basename $0)
 hostname=$(hostname -s)
 
-echo -n "creating SSH CA \n"
-mkdir -pm 755 /etc/ssh/ca/{.ssh,host}
-cd "src/etc/ssh/ca/host"
-cp -R * /etc/ssh/ca/host/
-echo -n "creating SSH CA key with password \
-	\nplease use keypass to store it
-	\n"
-ssh-keygen -t ed25519 -C "$hostname@telecom.lobby" -f /etc/ssh/ca/.ssh/ssh_ca_ed25519
-find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
-	ssh-keygen -s /etc/ssh/ca/.ssh/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 /etc/ssh/ca/host/{}/ssh_host_ed25519_key.pub
+case $1 in
+	"install")
+		echo -n "creating SSH CA \n"
+		mkdir -pm 755 /etc/ssh/ca/{.ssh,host}
+		cd "src/etc/ssh/ca/host"
+		cp -R * /etc/ssh/ca/host/
+		echo -n "creating SSH CA key with password \
+			\nplease use keypass to store it
+			\n"
+		ssh-keygen -t ed25519 -C "$hostname@telecom.lobby" -f /etc/ssh/ca/.ssh/ssh_ca_ed25519
+		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
+			ssh-keygen -s /etc/ssh/ca/.ssh/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 /etc/ssh/ca/host/{}/ssh_host_ed25519_key.pub
+
+		;;
+	"verify")
+		;;
+	"reset")
+		;;
+	*)
+		print $0 "unknown option"
+		exit 1
+		;;
+esac
+
+return 
 
