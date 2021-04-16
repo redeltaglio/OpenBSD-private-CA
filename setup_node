@@ -12,7 +12,7 @@ set -o nounset
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
 SYSDIR="/etc/ssh/ca"
-SSLDIR="/etc/ssl/"
+SSLDIR="/etc/ssl"
 UID=$(id -u)
 
 if [[ $UID -ne 0 ]]; then
@@ -41,6 +41,7 @@ app=$(basename $0)
 hostname=$(hostname -s)
 domainname=$(hostname | sed "s/$(hostname -s).//")
 appdir=$(pwd)
+publicip=$(ifconfig egress | grep inet |grep -v inet6 | cut -d ' ' -f2)
 
 INSTALL=/usr/bin/install
 RCCTL=/usr/sbin/rcctl
@@ -74,11 +75,20 @@ case $1 in
 		echo -n "creating SSL private CA key structure \
 			\n"
 		cp -Rp src/etc/ssl/ $SSLDIR
-		cd $SSLDIR
+		cd "$SSLDIR/ca/ca.telecom.lobby/"
 		$SSL rand -hex 16 > db/serial
 		$SSL req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
 		$SSL ca -selfsign -config root-ca.cnf -in root-ca.csr -out root-ca.crt -extensions ca_ext 
-		
+		echo -n "enable httpd OSCP vhost \
+			\n"
+		cd $appdir
+		find . -type f | xargs -I {} sed -i "s/\/PUBLICIP\//$publicip/g" {}
+		cp src/etc/http* /etc
+		$RCCTL enable httpd
+		$RCCTL start httpd
+		cd "$SSLDIR/ca/ca.telecom.lobby/"
+		mkdir /var/www/htdocs/ocsp.telecom.lobby
+		cp root-ca.crt /var/www/htdocs/ocsp.telecom.lobby
 		;;
 	"verify")
 		cd $SYSDIR
