@@ -13,7 +13,7 @@ name_opt		= utf8,esc_ctrl,multiline,lname,align
 [ca_dn]
 countryName		= "ES"
 organizationName	= "Telecom Lobby"
-commonName		= "ca.telecom.lobby
+commonName		= "ca.telecom.lobby"
 emailAddress		= "cyberanarkhia@telecomlobby.com"
 
 
