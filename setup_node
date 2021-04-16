@@ -3,6 +3,7 @@
 #	$Telecomlobby: setup_node,v 0.1 11/3/2021 21:01:04 taglio$
 #
 #sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md	
+#ssl: https://web.archive.org/web/20201028144550/https://www.pbdigital.org/openbsd/libressl/2019/10/14/offline-root-certificate-authority-openbsd.html	
 
 
 set -o errexit
@@ -38,6 +39,7 @@ function error_exit {
 app=$(basename $0)
 hostname=$(hostname -s)
 domainname=$(hostname | sed "s/$(hostname -s).//")
+appdir=$(pwd)
 
 INSTALL=/usr/bin/install
 RCCTL=/usr/sbin/rcctl
@@ -52,6 +54,7 @@ WGET=/usr/local/bin/wget
 CHOWN=/sbin/chown
 FIND=/usr/bin/find
 MKDIR=/bin/mkdir
+SSL=/usr/bin/openssl
 
 case $1 in
 	"install")
@@ -67,6 +70,9 @@ case $1 in
 		$FIND . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2
 		$FIND . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
 			$SSHKEYGEN -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
+		echo -n "creating SSL private CA key structure \
+			\n"
+		$SSL rand -hex 16 > src/etc/ssl/db/serial
 		;;
 	"verify")
 		cd $SYSDIR
@@ -85,6 +91,8 @@ case $1 in
 		echo -n "creating user certificate using wheel group \n"
 		$SSHKEYGEN -s $SYSDIR/ssh_ca_ed25519 -I taglio -n wheel \
         		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/taglio/id_ed25519.pub
+		
+	"krl")
 		echo -n "creating SSH KRL revocation list \
 		\nyou must have created the user certificate in your workstation \
 		\n with the utility workstation_create_pass_key_ssh_ca.sh \
