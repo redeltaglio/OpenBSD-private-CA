@@ -1,0 +1,8 @@
+server "ocsp.telecom.lobby" {
+	listen on /CASERVERIP/ port 80
+	root "htdocs/ocsp.telecom.lobby"
+	location "/*" {
+		directory auto index
+	}
+}
+
