@@ -12,6 +12,7 @@ set -o nounset
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
 SYSDIR="/etc/ssh/ca"
+SSLDIR="/etc/ssl/"
 UID=$(id -u)
 
 if [[ $UID -ne 0 ]]; then
@@ -72,7 +73,12 @@ case $1 in
 			$SSHKEYGEN -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
 		echo -n "creating SSL private CA key structure \
 			\n"
-		$SSL rand -hex 16 > src/etc/ssl/db/serial
+		cp -Rp src/etc/ssl/ $SSLDIR
+		cd $SSLDIR
+		$SSL rand -hex 16 > db/serial
+		$SSL req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
+		$SSL ca -selfsign -config root-ca.cnf -in root-ca.csr -out root-ca.crt -extensions ca_ext 
+		
 		;;
 	"verify")
 		cd $SYSDIR
