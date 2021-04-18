@@ -2,7 +2,7 @@
 
 [ default ]
 name			= root-ca
-domain_suffix		= telecom.lobby
+domain_suffix		= /DOMAINNAME/
 aia_url			= http://ocsp.$domain_suffix/$name.crt
 crl_url			= http://ocsp.$domain_suffix/$name.crl
 ocsp_url		= http://ocsp.$domain_suffix:9080
@@ -11,10 +11,10 @@ name_opt		= utf8,esc_ctrl,multiline,lname,align
 
 
 [ca_dn]
-countryName		= "ES"
-organizationName	= "Telecom Lobby"
-commonName		= "ca.telecom.lobby"
-emailAddress		= "cyberanarkhia@telecomlobby.com"
+countryName		= "/COUNTRY/"
+organizationName	= "/ORG/"
+commonName		= "ca./DOMAINNAME/"
+emailAddress		= "/HOSTNAME/@/DOMAINNAME/"
 
 
 [ca_default]
@@ -74,7 +74,7 @@ OCSP;URI.0		= $ocsp_url
 
 
 [name_constraints]
-permitted;DNS.0=telecom.lobby
+permitted;DNS.0=/DOMAINNAME/
 excluded;IP.0=0.0.0.0/0.0.0.0
 excluded;IP.1=0:0:0:0:0:0:0:0/0:0:0:0:0:0:0:0
 
