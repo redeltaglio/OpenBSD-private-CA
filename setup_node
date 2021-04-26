@@ -62,8 +62,8 @@ case $1 in
 		while [ -z $org ]
 		do
 			echo -n 'Type the organization '
-			read org
-			find . -type f | xargs -I {} sed -i "s/\/ORG\//$org/g" {}
+			read -r org
+			find . -type f | xargs -I {} sed -i "s/\/ORG\//"$org"/g" {}
 		done
 		find . -type f | xargs -I {} sed -i "s/\/PUBLICIP\//$publicip/g" {}
 		find . -type f | xargs -I {} sed -i "s/\/DOMAINNAME\//$domainname/g" {}
