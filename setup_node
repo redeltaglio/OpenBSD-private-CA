@@ -86,7 +86,7 @@ case $1 in
 			mkdir "$SSLDIR"
 		fi
 		cd $appdir
-		cp -Rp src/etc/ssl/ca/ "$SSLDIR"
+		cp -Rp src/etc/ssl/ca/* "$SSLDIR"
 		cd "$SSLDIR"
 		openssl rand -hex 16 > db/serial
 		openssl req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
