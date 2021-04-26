@@ -51,6 +51,25 @@ function error_exit {
 
 case $1 in
 	"install")
+		cd $appdir
+		country=
+		while [ -z $country ]
+		do
+			echo -n 'Type the country '
+			read country
+			find . -type f | xargs -I {} sed -i "s/\/COUNTRY\//$country/g" {}
+		done
+		org=
+		while [ -z $org ]
+		do
+			echo -n 'Type the organization '
+			read org
+			find . -type f | xargs -I {} sed -i "s/\/ORG\//$org/g" {}
+		done
+		find . -type f | xargs -I {} sed -i "s/\/PUBLICIP\//$publicip/g" {}
+		find . -type f | xargs -I {} sed -i "s/\/DOMAINNAME\//$domainname/g" {}
+		find . -type f | xargs -I {} sed -i "s/\/COUNTRY\//$country/g" {}
+		find . -type f | xargs -I {} sed -i "s/\/ORG\//$org/g" {}
 		echo -n "creating SSH CA \n"
 		mkdir -pm 755 $SYSDIR/{,host}
 		cd "src/etc/ssh/ca/host"
@@ -67,30 +86,11 @@ case $1 in
 			\n"
 		cp -Rp src/etc/ssl/ca/ $SSLDIR
 		cd "$SSLDIR/ca.$domainname/"
-		country=
-		while [ -z $country ]
-		do
-			echo -n 'Type the country '
-			read country
-			find . -type f | xargs -I {} sed -i "s/\/COUNTRY\//$country/g" {}
-		done
-		org=
-		while [ -z $org ]
-		do
-			echo -n 'Type the organization '
-			read org
-			find . -type f | xargs -I {} sed -i "s/\/ORG\//$org/g" {}
-		done
 		openssl rand -hex 16 > db/serial
 		openssl req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
 		openssl ca -selfsign -config root-ca.cnf -in root-ca.csr -out root-ca.crt -extensions ca_ext 
 		echo -n "enable httpd OSCP vhost \
 			\n"
-		cd $appdir
-		find . -type f | xargs -I {} sed -i "s/\/PUBLICIP\//$publicip/g" {}
-		find . -type f | xargs -I {} sed -i "s/\/DOMAINNAME\//$domainname/g" {}
-		find . -type f | xargs -I {} sed -i "s/\/COUNTRY\//$country/g" {}
-		find . -type f | xargs -I {} sed -i "s/\/ORG\//$org/g" {}
 		if [[ ! -e /etc/httpd.conf ]]; then
 			cp src/etc/http* /etc
 			rcctl enable httpd
