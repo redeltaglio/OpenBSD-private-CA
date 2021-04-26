@@ -1,6 +1,6 @@
-#!/bin/ksh
+#!/bin/ksh	
 
-#	$Telecomlobby: setup_node,v 0.1 11/3/2021 21:01:04 taglio$
+#	$Telecomlobby: setup_node,v 0.1 11/3/2021 21:01:04 $id1000$
 #
 #sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md	
 #ssl: https://web.archive.org/web/20201028144550/https://www.pbdigital.org/openbsd/libressl/2019/10/14/offline-root-certificate-authority-openbsd.html
@@ -15,6 +15,13 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
 SYSDIR="/etc/ssh/ca"
 SSLDIR="/etc/ssl/ca"
 UID=$(id -u)
+app=$(basename $0)
+hostname=$(hostname -s)
+domainname=$(hostname | sed "s/$(hostname -s).//")
+appdir=$(pwd)
+publicip=$(ifconfig egress | grep inet |grep -v inet6 | cut -d ' ' -f2)
+id1000=$(id -nu 1000)
+release=$(date +%d%m%Y)
 
 if [[ $UID -ne 0 ]]; then
 	print $0 "you've got to run $0 as UID=0 \n"
@@ -24,11 +31,12 @@ fi
 if [[ $# -eq 0 ]]; then
 	print $0 "have to be used with the following options \
 			\n \
-			\ninstall -> create SSH and SSL private CA \
-			\nverify  -> printout and verify certificates \
-			\nreset   -> reset filesystem hierarchy and delete certificates and keys \
-			\nusers   -> create users certificates. Default taglio \
-			\nkrl	  -> creating SSH KRL revocation list \
+			\ninstall  -> create SSH and SSL private CA \
+			\nverify   -> printout and verify certificates \
+			\nreset    -> reset filesystem hierarchy and delete certificates and keys \
+			\nusers    -> create users certificates. Default $id1000 \
+			\nkrl	   -> creating SSH KRL revocation list \
+			\ntransfer -> tar files on /home/$id1000 \
 			\n"
 	
 	exit 1
@@ -39,11 +47,7 @@ function error_exit {
     exit 1
 }
 
-app=$(basename $0)
-hostname=$(hostname -s)
-domainname=$(hostname | sed "s/$(hostname -s).//")
-appdir=$(pwd)
-publicip=$(ifconfig egress | grep inet |grep -v inet6 | cut -d ' ' -f2)
+
 
 case $1 in
 	"install")
@@ -90,23 +94,33 @@ case $1 in
 		cd $SYSDIR
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
 		ssh-keygen -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
-		ssh-keygen -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/taglio/id_ed25519-cert.pub
+		ssh-keygen -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/$id1000/id_ed25519-cert.pub
 		;;
 	"reset")
 		rm -rf {$SYSDIR,$SSLDIR}
 		mkdir -pm 755 $SYSDIR/host
-		mkdir -pm 755 $SYSDIR/user/taglio
+		mkdir -pm 755 $SYSDIR/user/$id1000
 		;;
 	"users")
-		cd src/etc/ssh/ca/user/taglio/
-		install -o root -g wheel -m 0750 -b id_ed25519.pub $SYSDIR/user/taglio/ 
+		cd src/etc/ssh/ca/user/$id1000/
+		install -o root -g wheel -m 0750 -b id_ed25519.pub $SYSDIR/user/$id1000/ 
 		echo -n "creating user certificate using wheel group \n"
-		ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -I taglio -n wheel \
-        		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/taglio/id_ed25519.pub
+		ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -I $id1000 -n wheel \
+        		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/$id1000/id_ed25519.pub
 		;;
 		
 	"krl")
-		ssh-keygen -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/taglio/id_ed25519-cert.pub
+		ssh-keygen -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/$id1000/id_ed25519-cert.pub
+		;;
+	"transfer")
+		cd $SYSDIR
+		if [[ ! -d "/home/$id1000/CA_transfer" ]]; then
+			mkdir -m 444 "/home/$id1000/CA_transfer"
+		else
+			rm -rf "/home/$id1000/CA_transfer"*
+		fi
+		cp -r {ssh_ca_ed25519.pub,host/*/ssh_host_ed25519_key-cert.pub,user/*/id_ed25519-cert.pub} "/home/$id1000/CA_transfer"
+		tar -cvf "/home/$id1000/CA_transfer$release.tar" "/home/$id1000/CA_transfer"
 		;;
 	*)
 		print $0 "unknown option \n"
