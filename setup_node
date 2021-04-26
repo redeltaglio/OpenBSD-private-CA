@@ -56,6 +56,7 @@ case $1 in
 		do
 			echo -n 'Type the country '
 			read country
+			typeset -u country=$country
 			find . -type f | xargs -I {} sed -i "s/\/COUNTRY\//$country/g" {}
 		done
 		org=
