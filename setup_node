@@ -64,7 +64,7 @@ case $1 in
 			echo -n 'Type the organization '
 			read -r org
 		done
-		$org=$(sed "s/ //g" $org)
+		org=$(sed "s/ //g" $org)
 		find . -type f | xargs -I {} sed -i "s/\/PUBLICIP\//$publicip/g" {}
 		find . -type f | xargs -I {} sed -i "s/\/DOMAINNAME\//$domainname/g" {}
 		find . -type f | xargs -I {} sed -i "s/\/COUNTRY\//$country/g" {}
