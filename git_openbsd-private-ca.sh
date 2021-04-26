@@ -8,10 +8,10 @@ RELEASE="/$REPO$DATE.tar"
 
 echo "creating tar release"
 rm -rf "$HOMEWRK$RELEASE"
-tar --exclude="$HOMEWRK$REPO/.git/*" -cvf "$HOMEWRK$RELEASE" "$HOMEWRK$REPO"
+tar --exclude="$HOMEWRK/$REPO/.git/*" -cvf "$HOMEWRK$RELEASE" "$HOMEWRK/$REPO"
 
 echo "git add, commit, sign and push"
-cd "$HOMEWRK$REPO"
+cd "$HOMEWRK/$REPO"
 echo "check branch"
 BRANCHCTRL=$(git branch | grep $DATE)
 if [ -z "${BRANCHCTRL}" ]
