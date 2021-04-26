@@ -68,6 +68,7 @@ case $1 in
 		find . -type f | xargs -I {} sed -i "s/\/DOMAINNAME\//$domainname/g" {}
 		find . -type f | xargs -I {} sed -i "s/\/COUNTRY\//$country/g" {}
 		find . -type f | xargs -I {} sed -i "s/\/ORG\//$org/g" {}
+		find . -type f | xargs -I {} sed -i "s/\/HOSTNAME\//$hostname/g" {}
 		echo -n "creating SSH CA \n"
 		mkdir -pm 755 $SYSDIR/{,host}
 		cd "src/etc/ssh/ca/host"
@@ -86,7 +87,7 @@ case $1 in
 			mkdir "$SSLDIR"
 		fi
 		cd $appdir
-		cp -Rp src/etc/ssl/ca/* "$SSLDIR"
+		cp -Rp src/etc/ssl/ca/*	 "$SSLDIR"
 		cd "$SSLDIR"
 		openssl rand -hex 16 > db/serial
 		openssl req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
