@@ -85,6 +85,7 @@ case $1 in
 		if [[ ! -d "$SSLDIR" ]]; then
 			mkdir "$SSLDIR"
 		fi
+		cd $appdir
 		cp -Rp src/etc/ssl/ca/ "$SSLDIR"
 		cd "$SSLDIR"
 		openssl rand -hex 16 > db/serial
