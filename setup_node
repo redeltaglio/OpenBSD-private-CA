@@ -45,21 +45,6 @@ domainname=$(hostname | sed "s/$(hostname -s).//")
 appdir=$(pwd)
 publicip=$(ifconfig egress | grep inet |grep -v inet6 | cut -d ' ' -f2)
 
-INSTALL=/usr/bin/install
-RCCTL=/usr/sbin/rcctl
-USERADD=/usr/sbin/useradd
-PKG_ADD=/usr/sbin/pkg_add
-PFCTL=/sbin/pfctl
-SH=/bin/ksh
-GETENT=/usr/bin/getent
-SSHKEYGEN=/usr/bin/ssh-keygen
-DOAS=/usr/bin/doas
-WGET=/usr/local/bin/wget
-CHOWN=/sbin/chown
-FIND=/usr/bin/find
-MKDIR=/bin/mkdir
-SSL=/usr/bin/openssl
-
 case $1 in
 	"install")
 		echo -n "creating SSH CA \n"
