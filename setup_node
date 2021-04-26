@@ -3,7 +3,8 @@
 #	$Telecomlobby: setup_node,v 0.1 11/3/2021 21:01:04 taglio$
 #
 #sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md	
-#ssl: https://web.archive.org/web/20201028144550/https://www.pbdigital.org/openbsd/libressl/2019/10/14/offline-root-certificate-authority-openbsd.html	
+#ssl: https://web.archive.org/web/20201028144550/https://www.pbdigital.org/openbsd/libressl/2019/10/14/offline-root-certificate-authority-openbsd.html
+#geodata: https://github.com/Redama-la-red-que-te-ama/radio-mobile-linux	
 
 
 set -o errexit
@@ -26,7 +27,8 @@ if [[ $# -eq 0 ]]; then
 			\ninstall -> create SSH and SSL private CA \
 			\nverify  -> printout and verify certificates \
 			\nreset   -> reset filesystem hierarchy and delete certificates and keys \
-			\nusers   -> create KRL to revoke a user certificate. Default taglio \
+			\nusers   -> create users certificates. Default taglio \
+			\nkrl	  -> creating SSH KRL revocation list \
 			\n"
 	
 	exit 1
@@ -109,10 +111,6 @@ case $1 in
         		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/taglio/id_ed25519.pub
 		
 	"krl")
-		echo -n "creating SSH KRL revocation list \
-		\nyou must have created the user certificate in your workstation \
-		\n with the utility workstation_create_pass_key_ssh_ca.sh \
-		\n"
 		$SSHKEYGEN -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/taglio/id_ed25519-cert.pub
 		;;
 	*)
