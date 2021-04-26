@@ -103,6 +103,7 @@ case $1 in
 		echo -n "creating user certificate using wheel group \n"
 		ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -I taglio -n wheel \
         		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/taglio/id_ed25519.pub
+		;;
 		
 	"krl")
 		ssh-keygen -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/taglio/id_ed25519-cert.pub
