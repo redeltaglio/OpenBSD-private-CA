@@ -1,0 +1,3 @@
+if [ -x /root/Bin/ocsp-server.sh ]; then
+        echo -n ' ocsp-server';	/root/Bin/ocsp-server.sh 
+fi

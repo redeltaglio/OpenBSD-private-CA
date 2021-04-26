@@ -1,1 +1,1 @@
-openssl ocsp -port 9080 -index /etc/ssl/ocsp.pbdigital.org/db/index -rsigner /etc/ssl/ocsp.pbdigital.org/root-ocsp.crt -rkey /etc/ssl/ocsp.pbdigital.org/private/root-ocsp.key -CA /etc/ssl/ocsp.pbdigital.org/root-ca.crt -text
+openssl ocsp -port 9080 -index /etc/ssl/ca/ca./DOMAINNAME//db/index -rsigner /etc/ssl/ca./DOMAINNAME//root-ca.crt -rkey /etc/ssl/ca./DOMAINNAME//private/root-ca.key -CA /etc/ssl/ca./DOMAINNAME//root-ca.crt -text

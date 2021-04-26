@@ -63,55 +63,64 @@ SSL=/usr/bin/openssl
 case $1 in
 	"install")
 		echo -n "creating SSH CA \n"
-		$MKDIR -pm 755 $SYSDIR/{,host}
-		cd "src$SYSDIR/host"
+		mkdir -pm 755 $SYSDIR/{,host}
+		cd "src/etc/ssh/ca/host"
 		cp -R * $SYSDIR/host/
 		echo -n "creating SSH CA key with password \
 			\nplease use keypass to store it
 			\n"
-		$SSHKEYGEN -t ed25519 -C "$hostname@$domainname" -f $SYSDIR/ssh_ca_ed25519
+		ssh-keygen -t ed25519 -C "$hostname@$domainname" -f $SYSDIR/ssh_ca_ed25519
 		echo -n "put the same password for:\n"
-		$FIND . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2
-		$FIND . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
-			$SSHKEYGEN -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
+		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2
+		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
+			ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
 		echo -n "creating SSL private CA key structure \
 			\n"
 		cp -Rp src/etc/ssl/ca/ $SSLDIR
-		cd "$SSLDIR/ca.telecom.lobby/"
-		$SSL rand -hex 16 > db/serial
-		$SSL req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
-		$SSL ca -selfsign -config root-ca.cnf -in root-ca.csr -out root-ca.crt -extensions ca_ext 
+		cd "$SSLDIR/ca.$domainname/"
+		openssl rand -hex 16 > db/serial
+		openssl req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
+		openssl ca -selfsign -config root-ca.cnf -in root-ca.csr -out root-ca.crt -extensions ca_ext 
 		echo -n "enable httpd OSCP vhost \
 			\n"
 		cd $appdir
 		find . -type f | xargs -I {} sed -i "s/\/PUBLICIP\//$publicip/g" {}
-		cp src/etc/http* /etc
-		$RCCTL enable httpd
-		$RCCTL start httpd
-		cd "$SSLDIR/ca.telecom.lobby/"
-		mkdir /var/www/htdocs/ocsp.telecom.lobby
-		cp root-ca.crt /var/www/htdocs/ocsp.telecom.lobby
+		find . -type f | xargs -I {} sed -i "s/\/DOMAINNAME\//$domainname/g" {}
+		if [[ ! -e /etc/httpd.conf ]]; then
+			cp src/etc/http* /etc
+			rcctl enable httpd
+			rcctl start httpd
+		fi
+		cd "$SSLDIR/ca.$domainname/"
+		if [[ ! -d  /var/www/htdocs/ocsp.$domainname ]]; then
+			mkdir /var/www/htdocs/ocsp.$domainname
+			cp root-ca.crt /var/www/htdocs/ocsp.$domainname
+		fi
+		if [[ ! -e  /root/Bin/ocsp-server.sh ]]; then
+			install -o root -g wheel -m 0750 -b src/root/Bin/ocsp-server.sh /root/Bin
+			cat src/etc/rc.local >> /etc/rc.local
+		fi
 		;;
 	"verify")
 		cd $SYSDIR
-		$FIND . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
-		$SSHKEYGEN -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
-		$SSHKEYGEN -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/taglio/id_ed25519-cert.pub
+		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
+		ssh-keygen -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
+		ssh-keygen -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/taglio/id_ed25519-cert.pub
 		;;
 	"reset")
 		rm -rf {$SYSDIR,$SSLDIR}
-		$MKDIR -pm 755 $SYSDIR/host
-		$MKDIR -pm 755 $SYSDIR/user/taglio
+		mkdir -pm 755 $SYSDIR/host
+		mkdir -pm 755 $SYSDIR/user/taglio
 		;;
 	"users")
 		cd src/etc/ssh/ca/user/taglio/
-		$INSTALL -o root -g wheel -m 0750 -b id_ed25519.pub $SYSDIR/user/taglio/ 
+		install -o root -g wheel -m 0750 -b id_ed25519.pub $SYSDIR/user/taglio/ 
 		echo -n "creating user certificate using wheel group \n"
-		$SSHKEYGEN -s $SYSDIR/ssh_ca_ed25519 -I taglio -n wheel \
+		ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -I taglio -n wheel \
         		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/taglio/id_ed25519.pub
 		
 	"krl")
-		$SSHKEYGEN -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/taglio/id_ed25519-cert.pub
+		ssh-keygen -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/taglio/id_ed25519-cert.pub
 		;;
 	*)
 		print $0 "unknown option \n"
