@@ -13,11 +13,29 @@ OpenBSD cyberanarkhia.telecom.lobby 6.8 GENERIC.MP#3 macppc
 taglio@cyberanarkhia:/home/taglio$ 
 ```
 
-#### SSH
+#### CA server
 
 No everyone know it, but sshd as ssl can use certificate based authentication. It's a feature of `openssh`. 
 
 Just clone this repository on the OpenBSD CA server machine:
+
+ ```shell
+$ mkdir -p Sources/Git
+$ cd Sources/Git
+$ git clone https://github.com/redeltaglio/OpenBSD-private-CA.git
+$ cd OpenBSD-private-CA
+ ```
+
+Our `setup_node` script got some options:
+
+- `install  -> create SSH and SSL private CA` 
+- `verify   -> printout and verify certificates` 
+- `reset    -> reset filesystem hierarchy and delete certificates and keys` 
+- `users    -> create users certificates` 
+- `krl	   -> creating SSH KRL revocation list` 
+- `transfer -> tar files on /home/$USER`
+
+
 
 Nice Regards,
 
