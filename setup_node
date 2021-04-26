@@ -33,7 +33,7 @@ if [[ $# -eq 0 ]]; then
 			\ninstall  -> create SSH and SSL private CA \
 			\nverify   -> printout and verify certificates \
 			\nreset    -> reset filesystem hierarchy and delete certificates and keys \
-			\nusers    -> create users certificates. Default $id1000 \
+			\nusers    -> create users certificates \
 			\nkrl	   -> creating SSH KRL revocation list \
 			\ntransfer -> tar files on /home/$id1000 \
 			\n"
