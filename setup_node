@@ -67,7 +67,7 @@ case $1 in
 		find . -type f | xargs -I {} sed -i "s/\/PUBLICIP\//$publicip/g" {}
 		find . -type f | xargs -I {} sed -i "s/\/DOMAINNAME\//$domainname/g" {}
 		find . -type f | xargs -I {} sed -i "s/\/COUNTRY\//$country/g" {}
-		find . -type f | xargs -I {} sed -i 's/\/ORG\//'"$org"'/g' {}
+		find . -type f | xargs -I {} sed -i 's/\/ORG\//'"${org}"'/g' {}
 		find . -type f | xargs -I {} sed -i "s/\/HOSTNAME\//$hostname/g" {}
 		echo -n "creating SSH CA \n"
 		mkdir -pm 755 $SYSDIR/{,host}
