@@ -2,7 +2,7 @@
 
 DATE=$(date +%d%m%Y)
 DATE_RELEASE=$(date +"%d/%m/%Y %H:%m:%S")
-HOMEWRK="${HOME}/Work/redama"
+HOMEWRK="${HOME}/Work/telecom.lobby"
 REPO=$(basename `pwd`)
 RELEASE="/$REPO$DATE.tar"
 
