@@ -2,9 +2,9 @@
 
 DATE=$(date +%d%m%Y)
 DATE_RELEASE=$(date +"%d/%m/%Y %H:%m:%S")
-HOMEWRK="/home/riccardo/Work/telecom.lobby"
-REPO="/OpenBSD-private-CA"
-RELEASE="/OpenBSD-private-CA$DATE.tar"
+HOMEWRK="${HOME}/Work/redama"
+REPO=$(basename `pwd`)
+RELEASE="/$REPO$DATE.tar"
 
 echo "creating tar release"
 rm -rf "$HOMEWRK$RELEASE"
