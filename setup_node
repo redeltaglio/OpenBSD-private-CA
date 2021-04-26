@@ -10,8 +10,7 @@ set -o nounset
 
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
-SYSDIR="/etc/ssh/ca"
-SSLDIR="/etc/ssl/ca"
+
 UID=$(id -u)
 app=$(basename $0)
 hostname=$(hostname -s)
@@ -20,6 +19,8 @@ appdir=$(pwd)
 publicip=$(ifconfig egress | grep inet |grep -v inet6 | cut -d ' ' -f2)
 id1000=$(id -nu 1000)
 release=$(date +%d%m%Y)
+SYSDIR="/etc/ssh/ca"
+SSLDIR="/etc/ssl/ca"
 
 if [[ $UID -ne 0 ]]; then
 	print $0 "you've got to run $0 as UID=0 \n"
@@ -82,11 +83,15 @@ case $1 in
 			ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
 		echo -n "creating SSL private CA key structure \
 			\n"
-		cp -Rp src/etc/ssl/ca/ $SSLDIR
-		cd "$SSLDIR/ca.$domainname/"
+		if [[ ! -d "$SSLDIR" ]]; then
+			mkdir "$SSLDIR"
+		fi
+		cp -Rp src/etc/ssl/ca/ "$SSLDIR"
+		cd "$SSLDIR"
 		openssl rand -hex 16 > db/serial
 		openssl req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
 		openssl ca -selfsign -config root-ca.cnf -in root-ca.csr -out root-ca.crt -extensions ca_ext 
+		openssl ca -gencrl -config root-ca.cnf -out root-ca.crl 
 		echo -n "enable httpd OSCP vhost \
 			\n"
 		if [[ ! -e /etc/httpd.conf ]]; then
@@ -94,10 +99,11 @@ case $1 in
 			rcctl enable httpd
 			rcctl start httpd
 		fi
-		cd "$SSLDIR/ca.$domainname/"
+		cd "$SSLDIR"
 		if [[ ! -d  /var/www/htdocs/ocsp.$domainname ]]; then
 			mkdir /var/www/htdocs/ocsp.$domainname
 			cp root-ca.crt /var/www/htdocs/ocsp.$domainname
+			cp root-ca.crl /var/www/htdocs/ocsp.$domainname
 		fi
 		if [[ ! -e  /root/Bin/ocsp-server.sh ]]; then
 			install -o root -g wheel -m 0750 -b src/root/Bin/ocsp-server.sh /root/Bin
