@@ -150,7 +150,8 @@ case $1 in
 		if [[ ! -d "/home/$id1000/CA_transfer" ]]; then
 			mkdir -m 444 "/home/$id1000/CA_transfer"
 		else
-			rm -rf "/home/$id1000/CA_transfer"*
+			rm -rf "/home/$id1000/CA_transfer/"*
+			rm -rf "/home/$id1000/CA_transfer."*
 		fi
 		cp -r {ssh_ca_ed25519.pub,ssh_ca.krl,host/*/ssh_host_ed25519_key-cert.pub,user/*/id_ed25519-cert.pub} "/home/$id1000/CA_transfer"
 		tar -cvf "/home/$id1000/CA_transfer$release.tar" "/home/$id1000/CA_transfer"
