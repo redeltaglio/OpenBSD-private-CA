@@ -95,6 +95,7 @@ case $1 in
 		openssl req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
 		openssl ca -selfsign -config root-ca.cnf -in root-ca.csr -out root-ca.crt -extensions ca_ext 
 		openssl ca -gencrl -config root-ca.cnf -out root-ca.crl 
+		openssl rsa -in private/root-ca.key -out private/root-ca-nopwd.key
 		echo -n "enable httpd OSCP vhost \
 			\n"
 		if [[ ! -e /etc/httpd.conf ]]; then
