@@ -112,6 +112,8 @@ case $1 in
 		if [[ ! -e  /root/Bin/ocsp-server.sh ]]; then
 			install -o root -g wheel -m 0750 -b src/root/Bin/ocsp-server.sh /root/Bin
 			cat src/etc/rc.local >> /etc/rc.local
+		else
+			install -o root -g wheel -m 0750 -b src/root/Bin/ocsp-server.sh /root/Bin
 		fi
 		pid_ocsp=$(pidof "ocsp-server.sh")
 		if [[ -z $pid_ocsp ]]; then
