@@ -107,7 +107,7 @@ case $1 in
 		if [[ ! -e /etc/httpd.conf ]]; then
 			cp src/etc/http* /etc
 			rcctl enable httpd
-			rcctl start httpd
+			rcctl start httpd ||  error_exit "$LINENO: ERROR: httpd failed."
 		fi
 		cd "$SSLDIR"
 		if [[ ! -d  /var/www/htdocs/ocsp.$domainname ]]; then
