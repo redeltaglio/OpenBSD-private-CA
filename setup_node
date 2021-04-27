@@ -120,6 +120,7 @@ case $1 in
 			echo -n "starting ocsp-server \
 			\n"
 			nohup /root/Bin/ocsp-server.sh &
+			echo "\n"
 		fi
 		;;
 	"verify")
