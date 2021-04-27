@@ -133,9 +133,9 @@ case $1 in
 		
 		;;
 	"verify")
-		cd $SYSDIR
+		cd "$SYSDIR/host"
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
-		ssh-keygen -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
+			ssh-keygen -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
 		ssh-keygen -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/$id1000/id_ed25519-cert.pub
 		cd $SSLDIR
 		openssl x509 -in root-ca.crt -text -noout
