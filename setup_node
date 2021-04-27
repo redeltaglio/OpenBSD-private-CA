@@ -136,7 +136,7 @@ case $1 in
 		cd "$SYSDIR/host"
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
 			ssh-keygen -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
-		ssh-keygen -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/$id1000/id_ed25519-cert.pub
+		#ssh-keygen -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/$id1000/id_ed25519-cert.pub
 		cd $SSLDIR
 		openssl x509 -in root-ca.crt -text -noout
 		;;
@@ -152,7 +152,7 @@ case $1 in
 		else
 			rm -rf "/home/$id1000/CA_transfer"*
 		fi
-		cp -r {ssh_ca_ed25519.pub,host/*/ssh_host_ed25519_key-cert.pub,user/*/id_ed25519-cert.pub} "/home/$id1000/CA_transfer"
+		cp -r {ssh_ca_ed25519.pub,ssh_ca.krl,host/*/ssh_host_ed25519_key-cert.pub,user/*/id_ed25519-cert.pub} "/home/$id1000/CA_transfer"
 		tar -cvf "/home/$id1000/CA_transfer$release.tar" "/home/$id1000/CA_transfer"
 		;;
 	*)
