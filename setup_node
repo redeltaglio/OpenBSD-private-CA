@@ -46,8 +46,9 @@ function error_exit {
     exit 1
 }
 
-
-
+function pidof {
+	ps axc -o pid,command | awk "\$2~/^`echo $1`\$/ {print \$1}"
+}
 case $1 in
 	"install")
 		cd $appdir
@@ -104,13 +105,18 @@ case $1 in
 		cd "$SSLDIR"
 		if [[ ! -d  /var/www/htdocs/ocsp.$domainname ]]; then
 			mkdir /var/www/htdocs/ocsp.$domainname
-			cp root-ca.crt /var/www/htdocs/ocsp.$domainname
-			cp root-ca.crl /var/www/htdocs/ocsp.$domainname
 		fi
+		cp root-ca.crt /var/www/htdocs/ocsp.$domainname
+		cp root-ca.crl /var/www/htdocs/ocsp.$domainname
 		cd $appdir
 		if [[ ! -e  /root/Bin/ocsp-server.sh ]]; then
 			install -o root -g wheel -m 0750 -b src/root/Bin/ocsp-server.sh /root/Bin
 			cat src/etc/rc.local >> /etc/rc.local
+		fi
+		if [[ -z pidof ocsp-server.sh ]]; then
+			echo -n "starting ocsp-server \
+			\n"
+			nohup /root/Bin/ocsp-server.sh &
 		fi
 		;;
 	"verify")
