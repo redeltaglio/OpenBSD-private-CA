@@ -31,8 +31,6 @@ Our `setup_node` script got some options:
 - `install  -> create SSH and SSL private CA` 
 - `verify   -> printout and verify certificates` 
 - `reset    -> reset filesystem hierarchy and delete certificates and keys` 
-- `users    -> create users certificates` 
-- `krl	   -> creating SSH KRL revocation list` 
 - `transfer -> tar files on /home/$USER`
 
 
