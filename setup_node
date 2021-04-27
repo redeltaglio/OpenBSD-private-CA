@@ -113,7 +113,7 @@ case $1 in
 			install -o root -g wheel -m 0750 -b src/root/Bin/ocsp-server.sh /root/Bin
 			cat src/etc/rc.local >> /etc/rc.local
 		fi
-		if [[ -z pidof ocsp-server.sh ]]; then
+		if [[ -z pidof "ocsp-server.sh" ]]; then
 			echo -n "starting ocsp-server \
 			\n"
 			nohup /root/Bin/ocsp-server.sh &
