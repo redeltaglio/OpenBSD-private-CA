@@ -1,0 +1,164 @@
+#!/bin/ksh	
+
+#sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md	
+#ssl: https://web.archive.org/web/20201028144550/https://www.pbdigital.org/openbsd/libressl/2019/10/14/offline-root-certificate-authority-openbsd.html
+#geodata: https://github.com/Redama-la-red-que-te-ama/radio-mobile-linux	
+
+
+set -o errexit
+set -o nounset
+
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
+
+UID=$(id -u)
+app=$(basename $0)
+hostname=$(hostname -s)
+domainname=$(hostname | sed "s/$(hostname -s).//")
+appdir=$(pwd)
+publicip=$(ifconfig egress | grep inet |grep -v inet6 | cut -d ' ' -f2)
+id1000=$(id -nu 1000)
+release=$(date +%d%m%Y)
+SYSDIR="/etc/ssh/ca"
+SSLDIR="/etc/ssl/ca"
+
+if [[ $UID -ne 0 ]]; then
+	print $0 "you've got to run $0 as UID=0 \n"
+	exit 1
+fi
+
+if [[ $# -eq 0 ]]; then
+	print $0 "have to be used with the following options \
+			\n \
+			\ninstall  -> create SSH and SSL private CA \
+			\nverify   -> printout and verify certificates \
+			\nreset    -> reset filesystem hierarchy and delete certificates and keys \
+			\ntransfer -> tar files on /home/$id1000 \
+			\n"
+	
+	exit 1
+fi
+
+function error_exit {
+    echo "${app}: ${1:-"Unknown Error"}" 1>&2
+    exit 1
+}
+
+function pidof {
+	ps axc -o pid,command | awk "\$2~/^`echo $1`\$/ {print \$1}"
+}
+case $1 in
+	"install")
+		cd $appdir
+		country=
+		while [ -z $country ]
+		do
+			echo -n 'Type the country '
+			read country
+			typeset -u country=$country
+		done
+		org=
+		while [ -z $org ]
+		do
+			echo -n 'Type the organization '
+			read -r org
+		done
+		
+		find . -type f | xargs -I {} sed -i "s/\/PUBLICIP\//$publicip/g" {}
+		find . -type f | xargs -I {} sed -i "s/\/DOMAINNAME\//$domainname/g" {}
+		find . -type f | xargs -I {} sed -i "s/\/COUNTRY\//$country/g" {}
+		find . -type f | xargs -I {} sed -i "s/\/ORG\//$org/g" {}
+		find . -type f | xargs -I {} sed -i "s/\/HOSTNAME\//$hostname/g" {}
+		echo -n "creating SSH CA \n"
+		mkdir -pm 755 $SYSDIR/{,host}
+		cd "src/etc/ssh/ca/host"
+		cp -R * $SYSDIR/host/
+		echo -n "creating SSH CA key with password \
+			\nplease use keypass to store it
+			\n"
+		ssh-keygen -t ed25519 -C "$hostname@$domainname" -f $SYSDIR/ssh_ca_ed25519
+		echo -n "put the same password for:\n"
+		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2
+		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
+			ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
+		cd $appdir
+		cd "src/etc/ssh/ca/user/$id1000/"
+		install -o root -g wheel -m 0750 -b id_ed25519.pub $SYSDIR/user/$id1000/ 
+		echo -n "creating user certificate using wheel group \n"
+		ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -I $id1000 -n wheel \
+        		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/$id1000/id_ed25519.pub
+		echo "creating SSH KRL revocation list \n"
+		ssh-keygen -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/$id1000/id_ed25519-cert.pub
+		echo -n "creating SSL private CA key structure \
+			\n"
+		if [[ ! -d "$SSLDIR" ]]; then
+			mkdir "$SSLDIR"
+		fi
+		cd $appdir
+		cp -Rp src/etc/ssl/ca/*	 "$SSLDIR"
+		cd "$SSLDIR"
+		openssl rand -hex 16 > db/serial
+		openssl req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
+		openssl ca -selfsign -config root-ca.cnf -in root-ca.csr -out root-ca.crt -extensions ca_ext 
+		openssl ca -gencrl -config root-ca.cnf -out root-ca.crl 
+		openssl rsa -in private/root-ca.key -out private/root-ca-nopwd.key
+		echo -n "enable httpd OSCP vhost \
+			\n"
+		if [[ ! -e /etc/httpd.conf ]]; then
+			cp src/etc/http* /etc
+			rcctl enable httpd
+			rcctl start httpd ||  error_exit "$LINENO: ERROR: httpd failed."
+		fi
+		cd "$SSLDIR"
+		if [[ ! -d  /var/www/htdocs/ocsp.$domainname ]]; then
+			mkdir /var/www/htdocs/ocsp.$domainname
+		fi
+		cp root-ca.crt /var/www/htdocs/ocsp.$domainname
+		cp root-ca.crl /var/www/htdocs/ocsp.$domainname
+		find . -name "io" | xargs -I {} rm -rf {}
+		cd $appdir
+		if [[ ! -e  /root/Bin/ocsp-server.sh ]]; then
+			install -o root -g wheel -m 0750 -b src/root/Bin/ocsp-server.sh /root/Bin
+			cat src/etc/rc.local >> /etc/rc.local
+		else
+			install -o root -g wheel -m 0750 -b src/root/Bin/ocsp-server.sh /root/Bin
+		fi
+		pid_ocsp=$(pidof "ocsp-server.sh")
+		if [[ -z $pid_ocsp ]]; then
+			echo -n "starting ocsp-server \
+			\n"
+			nohup /root/Bin/ocsp-server.sh &
+			echo "\n"
+		fi
+		
+		;;
+	"verify")
+		cd "$SYSDIR/host"
+		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
+			ssh-keygen -L -f $SYSDIR/host/{}/ssh_host_ed25519_key-cert.pub
+		#ssh-keygen -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/$id1000/id_ed25519-cert.pub
+		cd $SSLDIR
+		openssl x509 -in root-ca.crt -text -noout
+		;;
+	"reset")
+		rm -rf {$SYSDIR,$SSLDIR}
+		mkdir -pm 755 $SYSDIR/host
+		mkdir -pm 755 $SYSDIR/user/$id1000
+		;;
+	"transfer")
+		cd $SYSDIR
+		if [[ ! -d "/home/$id1000/CA_transfer" ]]; then
+			mkdir -m 444 "/home/$id1000/CA_transfer"
+		else
+			rm -rf "/home/$id1000/CA_transfer/"*
+			rm -rf "/home/$id1000/CA_transfer."*
+		fi
+		cp -r {ssh_ca_ed25519.pub,ssh_ca.krl,host/*,user/*/id_ed25519-cert.pub} "/home/$id1000/CA_transfer"
+		tar -cvf "/home/$id1000/CA_transfer.tar" "/home/$id1000/CA_transfer"
+		;;
+	*)
+		print $0 "unknown option \n"
+		exit 1
+		;;
+esac
+
