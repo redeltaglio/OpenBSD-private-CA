@@ -19,7 +19,7 @@ UID=$(id -u)
 if [[ $UID -ne 0 ]]; then
 	print $0 "you've got to run $0 as UID=0 \n"
 	exit 1
-fi
+fi	
 
 function error_exit {
     echo "${app}: ${1:-"Unknown Error"}" 1>&2
@@ -34,7 +34,7 @@ function pidof {
 if [[ ! -d "$BACKUPDIR" ]]; then
 	mkdir "$BACKUPDIR"
 fi
-cp -r "host/$hostname.$domainname/"* "$SSHDIR"
+cp -r "host/$hostname.$domainname/ssh/"* "$SSHDIR"
 cd "$SSHDIR"
 sed -i "s/\/ROUTERID\//$routerid/g" sshd_config
 mv {ssh_host_dsa_key,ssh_host_dsa_key.pub,ssh_host_ecdsa_key,ssh_host_ecdsa_key.pub,ssh_host_rsa_key,ssh_host_rsa_key.pub} "$BACKUPDIR"
