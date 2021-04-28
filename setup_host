@@ -42,7 +42,9 @@ fi
 cp -r "host/$hostname.$domainname/ssh/"* "$SSHDIR"
 cd "$SSHDIR"
 sed -i "s/\/ROUTERID\//$routerid/g" sshd_config
-mv {ssh_host_dsa_key,ssh_host_dsa_key.pub,ssh_host_ecdsa_key,ssh_host_ecdsa_key.pub,ssh_host_rsa_key,ssh_host_rsa_key.pub} "$BACKUPDIR"
+if [[ -e "$SSHDIR/ssh_host_rsa_key.pub" ]]; then
+	mv {ssh_host_dsa_key,ssh_host_dsa_key.pub,ssh_host_ecdsa_key,ssh_host_ecdsa_key.pub,ssh_host_rsa_key,ssh_host_rsa_key.pub} "$BACKUPDIR"
+fi
 rcctl restart sshd || error_exit "$LINENO: ERROR: sshd failed."
 
 
