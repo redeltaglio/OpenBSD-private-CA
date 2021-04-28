@@ -13,7 +13,11 @@ tmpdir=$(mktemp -d)
 appdir=$(pwd)
 hostname=$(hostname -s)
 domainname=$(hostname | sed "s/$(hostname -s).//")
-routerid=$(ifconfig vether0 | grep inet |grep -v inet6 | cut -d ' ' -f2)
+if [ "$hostname" = "cyberanarkhia" ];then
+	routerid=$(ifconfig egress | grep inet |grep -v inet6 | cut -d ' ' -f2)
+else
+	routerid=$(ifconfig vether0 | grep inet |grep -v inet6 | cut -d ' ' -f2)
+fi
 UID=$(id -u)
 
 if [[ $UID -ne 0 ]]; then
