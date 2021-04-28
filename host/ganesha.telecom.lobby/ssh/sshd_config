@@ -1,6 +1,6 @@
 AllowGroups wheel dsync
 
-
+#ListenAddress /PUBLICIP/
 ListenAddress /ROUTERID/
 ListenAddress ::1
 
