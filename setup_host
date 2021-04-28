@@ -7,12 +7,33 @@ set -o nounset
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
 
-CAFILE="/tmp/CA-transfer.tar"
+BACKUPDIR="/root/Backups/ssh"
 SSHDIR="/etc/ssh"
 tmpdir=$(mktemp -d)
+appdir=$(pwd)
+hostname=$(hostname -s)
+domainname=$(hostname | sed "s/$(hostname -s).//")
+routerid=$(ifconfig vether0 | grep inet |grep -v inet6 | cut -d ' ' -f2)
 
-cd "$tmpdir"
-tar xvf $CAFILE .
+function error_exit {
+    echo "${app}: ${1:-"Unknown Error"}" 1>&2
+    exit 1
+}
+
+function pidof {
+	ps axc -o pid,command | awk "\$2~/^`echo $1`\$/ {print \$1}"
+}
+
+
+if [[ ! -d "$BACKUPDIR" ]]; then
+	mkdir "$BACKUPDIR"
+fi
+cp -r "host/$hostname.$domainname/"* "$SSHDIR"
+cd "$SSHDIR"
+sed -i "s/\/ROUTERID\//$routerid/g" sshd_config
+mv {ssh_host_dsa_key,ssh_host_dsa_key.pub,ssh_host_ecdsa_key,ssh_host_ecdsa_key.pub,ssh_host_rsa_key,ssh_host_rsa_key.pub} "$BACKUPDIR"
+rcctl restart sshd || error_exit "$LINENO: ERROR: sshd failed."
+
 
 
 
