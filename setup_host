@@ -1,0 +1,20 @@
+#!/bin/ksh
+
+#sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md	
+
+set -o errexit
+set -o nounset
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/Bin
+
+CAFILE="/tmp/CA-transfer.tar"
+SSHDIR="/etc/ssh"
+tmpdir=$(mktemp -d)
+
+cd "$tmpdir"
+tar xvf $CAFILE .
+
+
+
+
+
