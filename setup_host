@@ -35,9 +35,6 @@ if [[ ! -d "$BACKUPDIR" ]]; then
 	mkdir "$BACKUPDIR"
 fi
 
-if [ "$hostname" = "cyberanarkhia" ]; then
-	
-
 cp -r "host/$hostname.$domainname/ssh/"* "$SSHDIR"
 cd "$SSHDIR"
 sed -i "s/\/ROUTERID\//$routerid/g" sshd_config
