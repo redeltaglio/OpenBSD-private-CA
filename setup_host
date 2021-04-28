@@ -14,6 +14,12 @@ appdir=$(pwd)
 hostname=$(hostname -s)
 domainname=$(hostname | sed "s/$(hostname -s).//")
 routerid=$(ifconfig vether0 | grep inet |grep -v inet6 | cut -d ' ' -f2)
+UID=$(id -u)
+
+if [[ $UID -ne 0 ]]; then
+	print $0 "you've got to run $0 as UID=0 \n"
+	exit 1
+fi
 
 function error_exit {
     echo "${app}: ${1:-"Unknown Error"}" 1>&2
