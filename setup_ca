@@ -1,6 +1,6 @@
 #!/bin/ksh	
 
-#sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md	
+#sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md		
 #ssl: https://web.archive.org/web/20201028144550/https://www.pbdigital.org/openbsd/libressl/2019/10/14/offline-root-certificate-authority-openbsd.html
 #geodata: https://github.com/Redama-la-red-que-te-ama/radio-mobile-linux	
 
@@ -78,9 +78,13 @@ case $1 in
 			\n"
 		ssh-keygen -t ed25519 -C "$hostname@$domainname" -f $SYSDIR/ssh_ca_ed25519
 		echo -n "put the same password for:\n"
-		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2
-		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
-			ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -h -I {} -n {} -V always:forever -z 1 $SYSDIR/host/{}/ssh_host_ed25519_key.pub
+		for dir in $(ls .); do
+			echo $dir | cut -d / -f1
+		done
+		for dir in $(ls .); do
+			host=$(echo $dir | cut -d / -f1)
+			ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -h -I $host -n $host -V always:forever -z 1 $SYSDIR/host/$host/ssh_host_ed25519_key.pub
+		done
 		cd $appdir
 		cd "src/etc/ssh/ca/user/$id1000/"
 		install -o root -g wheel -m 0750 -b id_ed25519.pub $SYSDIR/user/$id1000/ 
