@@ -131,7 +131,7 @@ case $1 in
 		if [[ -z $pid_ocsp ]]; then
 			echo -n "starting ocsp-server \
 			\n"
-			nohup /root/Bin/ocsp-server.sh &
+			nohup /root/Bin/ocsp-server.sh > /tmp/nohup.out &
 			echo "\n"
 		fi
 		
