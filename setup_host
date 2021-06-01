@@ -40,10 +40,22 @@ if [[ ! -d "$BACKUPDIR" ]]; then
 	mkdir "$BACKUPDIR"
 fi
 
-cp -r "host/$hostname.$domainname/ssh/"* "$SSHDIR"
+install -o root -g wheel -m 0750 src/etc/ssh/sshd_config /etc/ssh
 
 cd "$SSHDIR"
-
+if [[ ! -e ssh_host_ed25519_key-cert.pub ]]; then
+	wget "http://web.telecom.lobby/CA_transfer/$hostname.$domainname/ssh_host_ed25519_key-cert.pub"
+else
+	rm -rf ssh_host_ed25519_key-cert.pub
+	wget "http://web.telecom.lobby/CA_transfer/$hostname.$domainname/ssh_host_ed25519_key-cert.pub"
+fi
+cd ca
+if [[ ! -e ssh_ca_ed25519.pub ]]; then
+	wget http://web.telecom.lobby/CA_transfer/ssh_ca_ed25519.pub
+else
+	rm -rf ssh_ca_ed25519.pub
+	wget http://web.telecom.lobby/CA_transfer/ssh_ca_ed25519.pub
+fi
 sed -i "s/\/ROUTERID\//$routerid/g" sshd_config
 sed -i "s/\/PUBLICIP\//$publicip/g" sshd_config
 if [[ -e "$SSHDIR/ssh_host_rsa_key.pub" ]]; then
