@@ -158,7 +158,7 @@ case $1 in
 			rm -rf "/var/www/htdocs/web.telecom.lobby/CA_transfer."*
 		fi
 		cp -r {ssh_ca_ed25519.pub,ssh_ca.krl,host/*,user/*/id_ed25519-cert.pub} "/var/www/htdocs/web.telecom.lobby/CA_transfer"
-		tar -cvf "/var/www/htdocs/web.telecom.lobby/CA_transfer.tar" -s /\/var\/www\/htdocs\/web.telecom.lobby// "/var/www/htdocs/web.telecom.lobby/CA_transfer"
+		tar -cvf "/var/www/htdocs/web.telecom.lobby/CA_transfer.tar" -s /var// -s /www// -s /htdocs// -s /web.telecom.lobby// "/var/www/htdocs/web.telecom.lobby/CA_transfer"
 		;;
 	*)
 		print $0 "unknown option \n"
