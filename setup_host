@@ -41,7 +41,9 @@ if [[ ! -d "$BACKUPDIR" ]]; then
 fi
 
 cp -r "host/$hostname.$domainname/ssh/"* "$SSHDIR"
+
 cd "$SSHDIR"
+
 sed -i "s/\/ROUTERID\//$routerid/g" sshd_config
 sed -i "s/\/PUBLICIP\//$publicip/g" sshd_config
 if [[ -e "$SSHDIR/ssh_host_rsa_key.pub" ]]; then

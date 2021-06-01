@@ -152,7 +152,7 @@ case $1 in
 	"transfer")
 		cd $SYSDIR
 		if [[ ! -d "/var/www/htdocs/web.telecom.lobby/CA_transfer" ]]; then
-			mkdir -m 666 "/home/$id1000/CA_transfer"
+			mkdir -m 666 "var/www/htdocs/web.telecom.lobby/CA_transfer"
 		else
 			rm -rf "/var/www/htdocs/web.telecom.lobby/CA_transfer/"*
 			rm -rf "/var/www/htdocs/web.telecom.lobby/CA_transfer."*
