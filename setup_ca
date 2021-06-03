@@ -5,6 +5,7 @@
 #geodata: https://github.com/Redama-la-red-que-te-ama/radio-mobile-linux	
 
 
+
 set -o errexit
 set -o nounset
 
@@ -34,6 +35,7 @@ if [[ $# -eq 0 ]]; then
 			\nverify   -> printout and verify certificates \
 			\nreset    -> reset filesystem hierarchy and delete certificates and keys \
 			\ntransfer -> tar files on /home/$id1000 \
+			\nnewhost -> add a new MESH host \
 			\n"
 	
 	exit 1
@@ -135,7 +137,21 @@ case $1 in
 			echo "\n"
 		fi
 		
-		;;
+	;;
+	"newhost")
+		host=
+		while [ -z $host ]
+		do
+			echo 'Type the new hostname '
+			read host
+			if [[ ! -z "$host" ]]; then
+				ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -h -I $host -n $host -V always:forever -z 1 $SYSDIR/host/$host/ssh_host_ed25519_key.pub
+			else
+				error_exit "$LINENO: EXIT FROM USER." 
+			fi
+		done
+		
+	;;
 	"verify")
 		cd "$SYSDIR/host"
 		find . -type d | awk 'NR>2 {print last} {last=$0}' | cut -d / -f2 | xargs -I {} \
@@ -143,12 +159,12 @@ case $1 in
 		#ssh-keygen -Q -f $SYSDIR/ssh_ca.krl $SYSDIR/user/$id1000/id_ed25519-cert.pub
 		cd $SSLDIR
 		openssl x509 -in root-ca.crt -text -noout
-		;;
+	;;
 	"reset")
 		rm -rf {$SYSDIR,$SSLDIR}
 		mkdir -pm 755 $SYSDIR/host
 		mkdir -pm 755 $SYSDIR/user/$id1000
-		;;
+	;;
 	"transfer")
 		cd $SYSDIR
 		if [[ ! -d "/var/www/htdocs/web.telecom.lobby/CA_transfer" ]]; then
@@ -160,10 +176,10 @@ case $1 in
 		fi
 		cp -r {ssh_ca_ed25519.pub,ssh_ca.krl,host/*,user/*/id_ed25519-cert.pub} "/var/www/htdocs/web.telecom.lobby/CA_transfer"
 		tar -cvf "/var/www/htdocs/web.telecom.lobby/CA_transfer.tar" -s /var// -s /www// -s /htdocs// -s /web.telecom.lobby// "/var/www/htdocs/web.telecom.lobby/CA_transfer"
-		;;
+	;;
 	*)
 		print $0 "unknown option \n"
 		exit 1
-		;;
+	;;
 esac
 
