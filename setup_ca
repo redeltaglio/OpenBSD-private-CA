@@ -170,7 +170,7 @@ case $1 in
 		if [[ ! -d "/var/www/htdocs/web.telecom.lobby/CA_transfer" ]]; then
 			mkdir -m 755 "/var/www/htdocs/web.telecom.lobby/CA_transfer"
 		else
-			rm -rf "/var/www/htdocs/web.telecom.lobby/CA_transfer/"*
+			rm -rf "/var/www/htdocs/web.telecom.lobby/CA_transfer/"
 			rm -rf "/var/www/htdocs/web.telecom.lobby/CA_transfer."*
 			mkdir -m 755 "/var/www/htdocs/web.telecom.lobby/CA_transfer"
 		fi
