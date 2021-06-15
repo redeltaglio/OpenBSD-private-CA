@@ -34,7 +34,7 @@ if [[ $# -eq 0 ]]; then
 			\ninstall  -> create SSH and SSL private CA \
 			\nverify   -> printout and verify certificates \
 			\nreset    -> reset filesystem hierarchy and delete certificates and keys \
-			\ntransfer -> tar files on /home/$id1000 \
+			\ntransfer -> tar files on web.$domainname \
 			\nnewhost -> add a new MESH host \
 			\n"
 	
