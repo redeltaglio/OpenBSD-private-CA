@@ -151,6 +151,54 @@ case $1 in
 				error_exit "$LINENO: EXIT FROM USER." 
 			fi
 		done
+		lanip=
+		while [ -z $lanip ]
+		do
+			echo 'Type the internal IP address '
+			read lanip
+		done
+		hostname=$(echo $host | sed "s/$domainname//")
+		sshfp1=$(ssh-keygen -r $hostname -f $SYSDIR/host/$host/ssh_host_ed25519_key.pub | head -n 1)
+		sshfp2=$(ssh-keygen -r $hostname -f $SYSDIR/host/$host/ssh_host_ed25519_key.pub | tail -n 1)
+		echo "Updating $domainname internal zone"
+		serial=$(cat  "/var/nsd/zones/master/$domainname" | awk 'FNR == 4 {print}' | awk '{print $1}')
+		year=$(echo $serial | colrm 5)
+		month=$(echo $serial | colrm 7 | sed "s/$year//")
+		day=$(echo $serial | colrm 9 | sed -e "s/$year//" -e "s/$month//")
+		counter=$(echo $serial | colrm 11 | sed -e "s/$year//" -e "s/$month//" -e "s/$day//")
+		sysyear=$(date +"%Y")
+		sysmonth=$(date +"%m")
+		sysday=$(date +"%d")
+		ctrl=0
+		if [[ $year -lt $sysyear ]]; then
+			year=$sysyear
+			ctrl=1
+		fi
+		if [[ $month -lt $sysmonth ]]; then
+			$month=$sysmonth
+			ctrl=1
+		fi
+		if [[ $day -lt $sysday ]]; then
+			$day=$sysday
+			ctrl=1
+		fi
+		if [[ $ctrl -eq 1 ]]; then
+			counter=00
+		else
+			counter=$counter+1
+		fi
+		newserial="$year$month$day$counter"
+		sed -i "s/$serial/$newserial/" /var/nsd/zones/master/$domainname
+		for line in $(cat "/var/nsd/zones/master/$domainname" | grep $hostname | grep -v openbsd); do
+			if [[ ! -z $line ]]; then
+				sed -i "/${line}/d" /var/nsd/zones/master/$domainname
+			fi
+		done
+		echo "$hostname IN A $lanip" >> /var/nsd/zones/master/$domainname
+		echo "$sshfp1" >>  /var/nsd/zones/master/$domainname
+		echo "$sshfp2" >> /var/nsd/zones/master/$domainname
+		rcctl restart nsd
+		rcctl restart unbound
 		
 	;;
 	"verify")
