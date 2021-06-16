@@ -193,7 +193,7 @@ case $1 in
 		sed -i "s/$serial/$newserial/" /var/nsd/zones/master/$domainname
 		for line in $(cat "/var/nsd/zones/master/$domainname" | grep $hostname | grep -v openbsd); do
 			if [[ ! -z $line ]]; then
-				sed -i "/${line}/d" /var/nsd/zones/master/$domainname
+				sed -i "/$line/d" /var/nsd/zones/master/$domainname
 			fi
 		done
 		echo "$hostname IN A $lanip" >> /var/nsd/zones/master/$domainname
