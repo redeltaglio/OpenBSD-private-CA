@@ -35,7 +35,8 @@ if [[ $# -eq 0 ]]; then
 			\nverify   -> printout and verify certificates \
 			\nreset    -> reset filesystem hierarchy and delete certificates and keys \
 			\ntransfer -> tar files on web.$domainname \
-			\nnewhost -> add a new MESH host \
+			\nnewhost  -> add a new MESH host \
+			\nnewssl   -> download CSR and add the new CRT \
 			\n"
 	
 	exit 1
@@ -137,6 +138,7 @@ case $1 in
 			echo "\n"
 		fi
 		
+		
 	;;
 	"newhost")
 		host=
@@ -200,6 +202,24 @@ case $1 in
 		rcctl restart nsd
 		rcctl restart unbound
 		
+		
+	;;
+	"newssl")
+		cd $SSLDIR
+		host=
+		while [ -z $host ]
+		do
+			echo 'Type the new hostname '
+			read host
+			if [[ ! -z "$host" ]]; then
+				ftp -o "csr/$host.csr" "http://$host/$host.csr"
+				openssl ca -config root-ca.cnf -in "csr/$host.csr" -out "certs/$host.crt" -extensions server_ext
+				cp "certs/$host.crt" "/var/www/htdocs/web.telecom.lobby/CA_transfer/$host/"
+			else
+				error_exit "$LINENO: EXIT FROM USER." 
+			fi
+			
+		done
 	;;
 	"verify")
 		cd "$SYSDIR/host"
