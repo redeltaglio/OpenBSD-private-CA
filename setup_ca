@@ -147,6 +147,9 @@ case $1 in
 			echo 'Type the new hostname '
 			read host
 			if [[ ! -z "$host" ]]; then
+				if [[ ! -d "$SYSDIR/host/$host/" ]]; then
+					mkdir "$SYSDIR/host/$host/"
+				fi
 				install -o root -g wheel src/etc/ssh/ca/host/$host/ssh_host_ed25519_key.pub $SYSDIR/host/$host/
 				ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -h -I $host -n $host -V always:forever -z 1 $SYSDIR/host/$host/ssh_host_ed25519_key.pub
 			else
