@@ -194,7 +194,7 @@ case $1 in
 		fi
 		newserial="$year$month$day$counter"
 		sed -i "s/$serial/$newserial/" /var/nsd/zones/master/$domainname
-		for linenum in $(grep -n ^varuna /var/nsd/zones/master/$domainname | cut -d : -f1); do
+		for linenum in $(grep -n ^$hostname /var/nsd/zones/master/$domainname | cut -d : -f1); do
 			sed -i "$linenum"d /var/nsd/zones/master/$domainname
 		done
 		echo "$hostname IN A $lanip" >> /var/nsd/zones/master/$domainname
