@@ -63,7 +63,7 @@ else
 	rm -rf principals/
 	mkdir -m 750 principals/
 fi
-echo wheel > principals/taglio
+echo "wheel" > principals/taglio
 cd "$SSHDIR"
 sed -i "s/\/ROUTERID\//$routerid/g" sshd_config
 sed -i "s/\/PUBLICIP\//$publicip/g" sshd_config
