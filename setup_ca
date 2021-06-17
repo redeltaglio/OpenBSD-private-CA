@@ -159,7 +159,7 @@ case $1 in
 			echo 'Type the internal IP address '
 			read lanip
 		done
-		hostname=$(echo $host | sed "s/$domainname//")
+		hostname=$(echo $host | sed "s/.$domainname//")
 		sshfp1=$(ssh-keygen -r $hostname -f $SYSDIR/host/$host/ssh_host_ed25519_key.pub | head -n 1)
 		sshfp2=$(ssh-keygen -r $hostname -f $SYSDIR/host/$host/ssh_host_ed25519_key.pub | tail -n 1)
 		echo "Updating $domainname internal zone"
@@ -191,10 +191,8 @@ case $1 in
 		fi
 		newserial="$year$month$day$counter"
 		sed -i "s/$serial/$newserial/" /var/nsd/zones/master/$domainname
-		for line in $(cat "/var/nsd/zones/master/$domainname" | grep $hostname | grep -v openbsd); do
-			if [[ ! -z $line ]]; then
-				sed -i "/$line/d" /var/nsd/zones/master/$domainname
-			fi
+		for linenum in $(grep -n ^varuna /var/nsd/zones/master/$domainname | cut -d : -f1); do
+			sed -i "$linenum"d /var/nsd/zones/master/$domainname
 		done
 		echo "$hostname IN A $lanip" >> /var/nsd/zones/master/$domainname
 		echo "$sshfp1" >>  /var/nsd/zones/master/$domainname
