@@ -4,6 +4,7 @@
 #ssl: https://web.archive.org/web/20201028144550/https://www.pbdigital.org/openbsd/libressl/2019/10/14/offline-root-certificate-authority-openbsd.html
 #geodata: https://github.com/Redama-la-red-que-te-ama/radio-mobile-linux	
 
+# TODO nsd zone revise
 
 
 set -o errexit
