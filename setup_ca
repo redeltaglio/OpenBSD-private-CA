@@ -256,7 +256,7 @@ case $1 in
 		install -o root -g wheel -m 0750 -b $tempdir/CA_update/id_ed25519.pub $SYSDIR/user/$id1000/ 
 		capwd=$(cat $tempdir/CA_update/capwd.txt)
 		ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -q -I $id1000 -n wheel \
-        		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/$id1000/id_ed25519.pub <<<${capwd} 
+        		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/$id1000/id_ed25519.pub <<<`echo ${capwd}`
 		cp $SYSDIR/user/$id1000/id_ed25519-cert.pub $tempdir/CA_update/
 		umount $tempdir
 	;;
