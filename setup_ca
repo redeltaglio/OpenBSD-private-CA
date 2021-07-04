@@ -38,6 +38,7 @@ if [[ $# -eq 0 ]]; then
 			\ntransfer -> tar files on web.$domainname \
 			\nnewhost  -> add a new MESH host \
 			\nnewssl   -> download CSR and add the new CRT \
+			\nupuser   -> upgrade EdDSA user certificate \
 			\n"
 	
 	exit 1
@@ -247,6 +248,16 @@ case $1 in
 		fi
 		cp -r {ssh_ca_ed25519.pub,ssh_ca.krl,host/*,user/*/id_ed25519-cert.pub} "/var/www/htdocs/web.telecom.lobby/CA_transfer"
 		tar -cvf "/var/www/htdocs/web.telecom.lobby/CA_transfer.tar" -s /var// -s /www// -s /htdocs// -s /web.telecom.lobby// "/var/www/htdocs/web.telecom.lobby/CA_transfer"
+	;;
+	"upuser")
+		pendrive=$(tail -n 1 /var/log/messages | grep sd | awk '{print $6}' | sed "s/://")
+		tempdir=$(mktemp -d)
+		mount "/dev/${pendrive}i" $tempdir
+		install -o root -g wheel -m 0750 -b $tempdir/CA_update/id_ed25519.pub $SYSDIR/user/$id1000/ 
+		ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -q -f $tempdir/CA_update/capwd.txt -I $id1000 -n wheel \
+        		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/$id1000/id_ed25519.pub
+		cp $SYSDIR/user/$id1000/id_ed25519-cert.pub $tempdir/CA_update/
+		umount $tempdir
 	;;
 	*)
 		print $0 "unknown option \n"
