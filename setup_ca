@@ -29,6 +29,8 @@ if [[ $UID -ne 0 ]]; then
 	exit 1
 fi
 
+pkg_add expect
+
 if [[ $# -eq 0 ]]; then
 	print $0 "have to be used with the following options \
 			\n \
@@ -254,7 +256,7 @@ case $1 in
 		tempdir=$(mktemp -d)
 		mount "/dev/${pendrive}i" $tempdir
 		install -o root -g wheel -m 0750 -b $tempdir/CA_update/id_ed25519.pub $SYSDIR/user/$id1000/ 
-		expect user.exp $(cat $tempdir/CA_update/capwd.txt)
+		expect user.exp $tempdir
 		cp $SYSDIR/user/$id1000/id_ed25519-cert.pub $tempdir/CA_update/ 
 		umount $tempdir
 
