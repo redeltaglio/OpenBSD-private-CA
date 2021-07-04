@@ -1,11 +1,9 @@
 #!/usr/bin/expect -f
 
-set dir [lrange $argv 0 0]
-
-
 
 spawn ssh-keygen -s /etc/ssh/ca/ssh_ca_ed25519 -q -I taglio -n wheel -O no-x11-forwarding -V +31d -z 2 /etc/ssh/ca/user/taglio/id_ed25519.pub
 expect 	"Enter passphrase: " 
-send [ exec cat $dir/CA_update/capwd.txt ]
+send [ exec cat /mnt/usb/CA_update/capwd.txt ]
+send "\r"
 interact
 
