@@ -1,9 +1,10 @@
 #!/usr/bin/expect -f
 
 set pass [lrange $argv 0 0]
+set CorrectedPassword [ string map -nocase { "\$" "\\\$" } $pass ]
 
 spawn ssh-keygen -s /etc/ssh/ca/ssh_ca_ed25519 -q -I taglio -n wheel -O no-x11-forwarding -V +31d -z 2 /etc/ssh/ca/user/taglio/id_ed25519.pub
 expect 	"Enter passphrase: " 
-send -- "$pass\r"
+send -- "$CorrectedPassword\r"
 interact
 
