@@ -253,10 +253,10 @@ case $1 in
 	;;
 	"upuser")
 		pendrive=$(tail -n 1 /var/log/messages | grep sd | awk '{print $6}' | sed "s/://")
-		tempdir=$(mktemp -d)
+		tempdir="/mnt/usb"
 		mount "/dev/${pendrive}i" $tempdir
 		install -o root -g wheel -m 0750 -b $tempdir/CA_update/id_ed25519.pub $SYSDIR/user/$id1000/ 
-		expect user.exp $tempdir
+		expect user.exp 
 		cp $SYSDIR/user/$id1000/id_ed25519-cert.pub $tempdir/CA_update/ 
 		umount $tempdir
 
