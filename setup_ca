@@ -257,6 +257,7 @@ case $1 in
 		mount "/dev/${pendrive}i" $tempdir
 		install -o root -g wheel -m 0750 -b $tempdir/CA_update/id_ed25519.pub $SYSDIR/user/$id1000/ 
 		expect user.exp 
+		ssh-keygen -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/$id1000/id_ed25519-cert.pub
 		cp $SYSDIR/user/$id1000/id_ed25519-cert.pub $tempdir/CA_update/ 
 		umount $tempdir
 
