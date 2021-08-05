@@ -29,7 +29,8 @@ if [[ $UID -ne 0 ]]; then
 	exit 1
 fi
 
-pkg_add expect
+[[ $(pkg_info | grep -c expect) -eq 0 ]] && pkg_add expect
+
 
 if [[ $# -eq 0 ]]; then
 	print $0 "have to be used with the following options \
