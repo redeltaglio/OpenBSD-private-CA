@@ -1,8 +1,8 @@
-#!/bin/ksh	
+#!/bin/ksh
 
-#sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md		
+#sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md
 #ssl: https://web.archive.org/web/20201028144550/https://www.pbdigital.org/openbsd/libressl/2019/10/14/offline-root-certificate-authority-openbsd.html
-#geodata: https://github.com/Redama-la-red-que-te-ama/radio-mobile-linux	
+#geodata: https://github.com/Redama-la-red-que-te-ama/radio-mobile-linux
 
 # TODO nsd zone revise
 
@@ -43,7 +43,7 @@ if [[ $# -eq 0 ]]; then
 			\nnewssl   -> download CSR and add the new CRT \
 			\nupuser   -> upgrade EdDSA user certificate \
 			\n"
-	
+
 	exit 1
 fi
 
@@ -71,7 +71,7 @@ case $1 in
 			echo -n 'Type the organization '
 			read -r org
 		done
-		
+
 		find . -type f | xargs -I {} sed -i "s/\/PUBLICIP\//$publicip/g" {}
 		find . -type f | xargs -I {} sed -i "s/\/DOMAINNAME\//$domainname/g" {}
 		find . -type f | xargs -I {} sed -i "s/\/COUNTRY\//$country/g" {}
@@ -95,7 +95,7 @@ case $1 in
 		done
 		cd $appdir
 		cd "src/etc/ssh/ca/user/$id1000/"
-		install -o root -g wheel -m 0750 -b id_ed25519.pub $SYSDIR/user/$id1000/ 
+		install -o root -g wheel -m 0750 -b id_ed25519.pub $SYSDIR/user/$id1000/
 		echo -n "creating user certificate using wheel group \n"
 		ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -I $id1000 -n wheel \
         		-O no-x11-forwarding -V +31d -z 2 $SYSDIR/user/$id1000/id_ed25519.pub
@@ -110,9 +110,9 @@ case $1 in
 		cp -Rp src/etc/ssl/ca/*	 "$SSLDIR"
 		cd "$SSLDIR"
 		openssl rand -hex 16 > db/serial
-		openssl req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key  
-		openssl ca -selfsign -config root-ca.cnf -in root-ca.csr -out root-ca.crt -extensions ca_ext 
-		openssl ca -gencrl -config root-ca.cnf -out root-ca.crl 
+		openssl req -new -config root-ca.cnf -out root-ca.csr -keyout private/root-ca.key
+		openssl ca -selfsign -config root-ca.cnf -in root-ca.csr -out root-ca.crt -extensions ca_ext
+		openssl ca -gencrl -config root-ca.cnf -out root-ca.crl
 		openssl rsa -in private/root-ca.key -out private/root-ca-nopwd.key
 		echo -n "enable httpd OSCP vhost \
 			\n"
@@ -142,8 +142,8 @@ case $1 in
 			nohup /root/Bin/ocsp-server.sh > /tmp/nohup.out &
 			echo "\n"
 		fi
-		
-		
+
+
 	;;
 	"newhost")
 		host=
@@ -158,7 +158,7 @@ case $1 in
 				install -o root -g wheel src/etc/ssh/ca/host/$host/ssh_host_ed25519_key.pub $SYSDIR/host/$host/
 				ssh-keygen -s $SYSDIR/ssh_ca_ed25519 -h -I $host -n $host -V always:forever -z 1 $SYSDIR/host/$host/ssh_host_ed25519_key.pub
 			else
-				error_exit "$LINENO: EXIT FROM USER." 
+				error_exit "$LINENO: EXIT FROM USER."
 			fi
 		done
 		lanip=
@@ -207,8 +207,8 @@ case $1 in
 		echo "$sshfp2" >> /var/nsd/zones/master/$domainname
 		rcctl restart nsd
 		rcctl restart unbound
-		
-		
+
+
 	;;
 	"newssl")
 		cd $SSLDIR
@@ -222,9 +222,9 @@ case $1 in
 				openssl ca -config root-ca.cnf -in "csr/$host.csr" -out "certs/$host.crt" -extensions server_ext
 				cp "certs/$host.crt" "/var/www/htdocs/web.telecom.lobby/CA_transfer/$host/"
 			else
-				error_exit "$LINENO: EXIT FROM USER." 
+				error_exit "$LINENO: EXIT FROM USER."
 			fi
-			
+
 		done
 	;;
 	"verify")
@@ -253,14 +253,15 @@ case $1 in
 		tar -cvf "/var/www/htdocs/web.telecom.lobby/CA_transfer.tar" -s /var// -s /www// -s /htdocs// -s /web.telecom.lobby// "/var/www/htdocs/web.telecom.lobby/CA_transfer"
 	;;
 	"upuser")
+		#try to use sshpass
 		pendrive=$(tail -n 1 /var/log/messages | grep sd | awk '{print $6}' | sed "s/://")
 		tempdir="/mnt/usb"
 		mount "/dev/${pendrive}i" $tempdir
-		install -o root -g wheel -m 0750 -b $tempdir/CA_update/id_ed25519.pub $SYSDIR/user/$id1000/ 
+		install -o root -g wheel -m 0750 -b $tempdir/CA_update/id_ed25519.pub $SYSDIR/user/$id1000/
 		rm -rf  $SYSDIR/user/$id1000/id_ed25519-cert.pub
-		expect user.exp 
+		expect user.exp
 		ssh-keygen -k -f $SYSDIR/ssh_ca.krl -s $SYSDIR/ssh_ca_ed25519.pub -z 2 $SYSDIR/user/$id1000/id_ed25519-cert.pub
-		cp $SYSDIR/user/$id1000/id_ed25519-cert.pub $tempdir/CA_update/ 
+		cp $SYSDIR/user/$id1000/id_ed25519-cert.pub $tempdir/CA_update/
 		umount $tempdir
 
 	;;
@@ -269,4 +270,3 @@ case $1 in
 		exit 1
 	;;
 esac
-
