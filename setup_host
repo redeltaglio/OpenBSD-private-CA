@@ -13,12 +13,13 @@ tmpdir=$(mktemp -d)
 appdir=$(pwd)
 hostname=$(hostname -s)
 domainname=$(hostname | sed "s/$(hostname -s).//")
+egressinterface=$(ifconfig egress | cut -d  : -f1 | head -n1)
 if [ "$hostname" = "cyberanarkhia" ];then
-	routerid=$(ifconfig egress | grep inet |grep -v inet6 | cut -d ' ' -f2)
+	routerid=$(ifconfig "${egressinterface}" | grep inet |grep -v inet6 | cut -d ' ' -f2)
 else
 	routerid=$(ifconfig vether0 | grep inet |grep -v inet6 | cut -d ' ' -f2)
 fi
-publicip=$(ifconfig egress | grep inet |grep -v inet6 | cut -d ' ' -f2)
+publicip=$(ifconfig "${egressinterface}" | grep inet |grep -v inet6 | cut -d ' ' -f2)
 UID=$(id -u)
 
 if [[ $UID -ne 0 ]]; then
