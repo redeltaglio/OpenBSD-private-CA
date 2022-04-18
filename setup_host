@@ -1,6 +1,6 @@
 #!/bin/ksh
 
-#sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md	
+#sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md
 
 set -o errexit
 set -o nounset
@@ -25,7 +25,7 @@ UID=$(id -u)
 if [[ $UID -ne 0 ]]; then
 	print $0 "you've got to run $0 as UID=0 \n"
 	exit 1
-fi	
+fi
 
 function error_exit {
     echo "${app}: ${1:-"Unknown Error"}" 1>&2
@@ -42,7 +42,11 @@ if [[ ! -d "$BACKUPDIR" ]]; then
 fi
 
 install -o root -g wheel -m 0750 src/etc/ssh/sshd_config /etc/ssh
-
+continue=false
+echo "waiting for network.."
+while [[ ! "${continue}" ]]; do
+	[[ "172.16.17.106" == $(dig A web.telecom.lobby +short) ]] && continue=true
+done
 cd "$SSHDIR"
 if [[ ! -e ssh_host_ed25519_key-cert.pub ]]; then
 	wget "http://web.telecom.lobby/CA_transfer/$hostname.$domainname/ssh_host_ed25519_key-cert.pub"
@@ -72,9 +76,3 @@ if [[ -e "$SSHDIR/ssh_host_rsa_key.pub" ]]; then
 	mv {ssh_host_dsa_key,ssh_host_dsa_key.pub,ssh_host_ecdsa_key,ssh_host_ecdsa_key.pub,ssh_host_rsa_key,ssh_host_rsa_key.pub} "$BACKUPDIR"
 fi
 rcctl restart sshd || error_exit "$LINENO: ERROR: sshd failed."
-
-
-
-
-
-
