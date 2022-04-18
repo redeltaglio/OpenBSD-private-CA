@@ -44,8 +44,8 @@ fi
 install -o root -g wheel -m 0750 src/etc/ssh/sshd_config /etc/ssh
 continue=false
 echo "waiting for network.."
-while [[ ! "${continue}" ]]; do
-	[[ "172.16.17.106" == $(dig A web.telecom.lobby +short) ]] && continue=true
+while [[ "${continue}" == false ]]; do
+	[[ "cyberanarkhia.telecom.lobby." == $(dig A web.telecom.lobby +short | head -n 1) ]] && continue=true
 done
 cd "$SSHDIR"
 if [[ ! -e ssh_host_ed25519_key-cert.pub ]]; then
