@@ -171,7 +171,7 @@ case $1 in
 		sshfp1=$(ssh-keygen -r $hostname -f $SYSDIR/host/$host/ssh_host_ed25519_key.pub | head -n 1)
 		sshfp2=$(ssh-keygen -r $hostname -f $SYSDIR/host/$host/ssh_host_ed25519_key.pub | tail -n 1)
 		echo "Updating $domainname internal zone"
-		serial=$(cat  "/var/nsd/zones/master/$domainname" | awk 'FNR == 4 {print}' | awk '{print $1}')
+		serial=$(cat  "/var/nsd/zones/master/$domainname" | awk 'FNR == 3 {print}' | awk '{print $1}')
 		year=$(echo $serial | colrm 5)
 		month=$(echo $serial | colrm 7 | sed "s/$year//")
 		day=$(echo $serial | colrm 9 | sed -e "s/$year//" -e "s/$month//")
@@ -185,11 +185,11 @@ case $1 in
 			ctrl=1
 		fi
 		if [[ $month -lt $sysmonth ]]; then
-			$month=$sysmonth
+			month=$sysmonth
 			ctrl=1
 		fi
 		if [[ $day -lt $sysday ]]; then
-			$day=$sysday
+			day=$sysday
 			ctrl=1
 		fi
 		if [[ $ctrl -eq 1 ]]; then
