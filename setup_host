@@ -43,6 +43,10 @@ fi
 
 install -o root -g wheel -m 0750 src/etc/ssh/sshd_config /etc/ssh
 continue=false
+for i in $(ifconfig gre |awk '{print $1}' | grep gre*[0-9] | cut -d : -f1); do
+	ifconfig "${i}" down
+done
+ifconfig gre0 up
 echo "waiting for network.."
 while [[ "${continue}" == false ]]; do
 	[[ "cyberanarkhia.telecom.lobby." == $(dig A web.telecom.lobby +short @172.16.17.106 | head -n 1) ]] && continue=true
@@ -69,6 +73,7 @@ else
 	mkdir -m 750 principals/
 fi
 echo "wheel" > principals/taglio
+chmod 0440 principals/taglio
 cd "$SSHDIR"
 sed -i "s/\/ROUTERID\//$routerid/g" sshd_config
 sed -i "s/\/PUBLICIP\//$publicip/g" sshd_config
@@ -76,3 +81,6 @@ if [[ -e "$SSHDIR/ssh_host_rsa_key.pub" ]]; then
 	mv {ssh_host_dsa_key,ssh_host_dsa_key.pub,ssh_host_ecdsa_key,ssh_host_ecdsa_key.pub,ssh_host_rsa_key,ssh_host_rsa_key.pub} "$BACKUPDIR"
 fi
 rcctl restart sshd || error_exit "$LINENO: ERROR: sshd failed."
+for i in $(ifconfig gre |awk '{print $1}' | grep gre*[0-9] | cut -d : -f1); do
+	ifconfig "${i}" up
+done
