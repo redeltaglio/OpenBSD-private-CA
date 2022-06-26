@@ -3,6 +3,7 @@
 #sshd: https:/github.com/vedetta-com/vedetta/blob/master/src/usr/local/share/doc/vedetta/OpenSSH_Principals.md
 #ssl: https://web.archive.org/web/20201028144550/https://www.pbdigital.org/openbsd/libressl/2019/10/14/offline-root-certificate-authority-openbsd.html
 #geodata: https://github.com/Redama-la-red-que-te-ama/radio-mobile-linux
+#ipsec: https://circle-networks.com/resources?lang=en&doc=bl200056p
 
 # TODO nsd zone revise
 
