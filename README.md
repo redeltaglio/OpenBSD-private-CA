@@ -1,9 +1,9 @@
-# OpenBSD SSH and SSL CA server
+# OpenBSD SSH, SSL and IKED CA server
 ![img](https://learnbchs.org/puffy.png)
 
 
 
-Configuration of an OpenBSD rugged secured server to obtain a private CA for SSH and SSL.
+Configuration of an OpenBSD rugged secured server to obtain a private CA for SSH, SSL and iked.
 
 Reverse a private server, kvm instance, docker or another container for this type of application. It'll be useful have it on a spare encrypted USB disk or virtual hided disk. I've got one mounted on a dedicated `macppc` OpenBSD instance. I use it like local LAN resolver, SNMP collector and, how not, like a CA server.
 
