@@ -1,0 +1,39 @@
+# OpenSSL configuration for iked server and clients
+
+[ req ]
+
+default_bits = 2048
+distinguished_name = req_distinguished_name
+prompt = yes
+
+[ req_distinguished_name ]
+
+commonName = 
+
+
+[ x509v3_client ]
+
+country =
+state =
+locality =
+organization =
+unit =
+keyUsage = tlsClient
+subjectAltName = EMAIL:${req_distinguished_name::commonName}
+
+[ ca ]
+default_ca = ca.telecomlobby.com
+
+[ ca.telecomlobby.com ]
+certificate = /etc/ssl/ca.telecomlobby.com/ca/ca.telecomlobby.com.crt
+private_key = /etc/ssl/ca.telecomlobby.com/private/ca.telecomlobby.com.key
+serial = /etc/ssl/ca.telecomlobby.com/db/vpn.srl
+database = /etc/ssl/ca.telecomlobby.com/db/vpn.txt
+new_certs_dir = /etc/ssl/ca.telecomlobby.com/certs
+default_days = 365
+default_crl_days= 365
+default_md = sha256
+policy = ca.telecomlobby.com_policy
+
+[ ca.telecomlobby.com_policy ]
+commonName = supplied
