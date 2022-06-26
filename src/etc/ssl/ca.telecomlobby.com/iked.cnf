@@ -26,6 +26,7 @@ default_ca = ca.telecomlobby.com
 
 [ ca.telecomlobby.com ]
 certificate = /etc/ssl/ca.telecomlobby.com/ca/ca.telecomlobby.com.crt
+public_key = /etc/ssl/ca.telecomlobby.com/ca.telecomlobby.com.pub
 private_key = /etc/ssl/ca.telecomlobby.com/private/ca.telecomlobby.com.key
 serial = /etc/ssl/ca.telecomlobby.com/db/vpn.srl
 database = /etc/ssl/ca.telecomlobby.com/db/vpn.txt
