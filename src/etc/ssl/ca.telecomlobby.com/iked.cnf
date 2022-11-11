@@ -5,36 +5,56 @@
 default_bits = 2048
 distinguished_name = req_distinguished_name
 prompt = yes
+x509_extensions = v3_ca
+
 
 [ req_distinguished_name ]
 
-commonName = 
+C = Country
+C_default =
+ST = State
+ST_default =
+L = Locality
+L_default =
+O = Organization
+O_default = Telecom Lobby
+OU = Unit
+OU_default = VPNC
+CN = Common Name
+emailAddress = Email
 
+[ v3_ca]
 
-[ x509v3_client ]
-
-country =
-state =
-locality =
-organization =
-unit =
-keyUsage = tlsClient
-subjectAltName = EMAIL:${req_distinguished_name::commonName}
+basicConstraints=CA:FALSE
+keyUsage=digitalSignature
+extendedKeyUsage=ipsecIKE
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+subjectAltName=email:vishnu@ca.telecomlobby.com
 
 [ ca ]
+
 default_ca = ca.telecomlobby.com
 
 [ ca.telecomlobby.com ]
+
 certificate = /etc/ssl/ca.telecomlobby.com/ca/ca.telecomlobby.com.crt
-public_key = /etc/ssl/ca.telecomlobby.com/ca.telecomlobby.com.pub
+public_key = /etc/ssl/ca.telecomlobby.com/public/ca.telecomlobby.com.pub
 private_key = /etc/ssl/ca.telecomlobby.com/private/ca.telecomlobby.com.key
 serial = /etc/ssl/ca.telecomlobby.com/db/vpn.srl
 database = /etc/ssl/ca.telecomlobby.com/db/vpn.txt
 new_certs_dir = /etc/ssl/ca.telecomlobby.com/certs
+crl = /etc/ssl/ca.telecomlobby.com/crls/vpn.crl
+policy = ca.telecomlobby.com_policy
 default_days = 365
 default_crl_days= 365
 default_md = sha256
-policy = ca.telecomlobby.com_policy
 
 [ ca.telecomlobby.com_policy ]
-commonName = supplied
+countryName             = supplied
+stateOrProvinceName     = supplied
+organizationName        = supplied
+localityName        = supplied
+organizationalUnitName  = supplied
+commonName              = supplied
+emailAddress            = supplied
