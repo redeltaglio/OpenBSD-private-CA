@@ -4,6 +4,7 @@
 #ssl: https://web.archive.org/web/20201028144550/https://www.pbdigital.org/openbsd/libressl/2019/10/14/offline-root-certificate-authority-openbsd.html
 #geodata: https://github.com/Redama-la-red-que-te-ama/radio-mobile-linux
 #ipsec: https://circle-networks.com/resources?lang=en&doc=bl200056p
+#LibreSSL x509v3: https://man.archlinux.org/man/community/libressl/libressl-x509v3.cnf.5.en
 
 # TODO nsd zone revise
 
@@ -24,6 +25,7 @@ id1000=$(id -nu 1000)
 release=$(date +%d%m%Y)
 SYSDIR="/etc/ssh/ca"
 SSLDIR="/etc/ssl/ca"
+CADIR="/etc/ssl/ca.telecomlobby.com"
 
 if [[ $UID -ne 0 ]]; then
 	print $0 "you've got to run $0 as UID=0 \n"
@@ -37,6 +39,8 @@ if [[ $# -eq 0 ]]; then
 	print $0 "have to be used with the following options \
 			\n \
 			\ninstall  -> create SSH and SSL private CA \
+			\nikedinstall -> create and install iked(8) CA \
+			\nikedadd [public domain name] -> add new iked host certificate \
 			\nverify   -> printout and verify certificates \
 			\nreset    -> reset filesystem hierarchy and delete certificates and keys \
 			\ntransfer -> tar files on web.$domainname \
@@ -145,6 +149,21 @@ case $1 in
 		fi
 
 
+	;;
+	"ikedcreate")
+		[[ -d "${CADIR}" ]] || mkdir "${CADIR}" && (rm -rf "${CADIR}" ; mkdir "${CADIR}")
+		mkdir "${CADIR}"/{crls,ca,certs,db,private,public,export}
+		chmod 0750  "${CADIR}"/{crls,ca,certs,db,public,export}
+		chmod 0700 "${CADIR}"/private
+		install -o root -g wheel -m 0650 src/etc/ssl/ca.telecomlobby.com/iked.cnf  "${CADIR}"/
+		install -o root -g wheel -m 0650 src/etc/ssl/ca.telecomlobby.com/ca/ca.telecomlobby.com.crt "${CADIR}"/ca/
+	;;
+	"ikedadd")
+		openssl req -new -nodes -keyout "${CADIR}"/private/$2.key -config "${CADIR}"/iked.cnf -out "${CADIR}"/certs/$2.csr
+		openssl ca -batch -config "${CADIR}"/iked.cnf -in "${CADIR}"/certs/$2.csr -extensions x509v3_client -extfile "${CADIR}"/iked.cnf -out "${CADIR}"/certs/$2.crt
+		openssl x509 -in "${CADIR}"/certs/$2.crt -pubkey -out "${CADIR}"/certs/$2.pem > "${CADIR}"/public/$2.pub
+		rm -rf "${CADIR}"/certs/$2.csr
+		openssl pkcs12 -export -inkey "${CADIR}"/private/$2.key -in "${CADIR}"/certs/$2.crt -out "${CADIR}"/export/$2.p12 -password pass:123456789
 	;;
 	"newhost")
 		host=
