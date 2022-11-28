@@ -1,10 +1,11 @@
-#!/usr/local/bin/expect -f
+#!/usr/local/bin/expect -d
 
 set timeout 3
 
-set password [lindex $argv 0]
+set asdf [lindex $argv 0]
 
 spawn ssh-keygen -s /etc/ssh/ca/ssh_ca_ed25519 -q -I taglio -n wheel -O no-x11-forwarding -V +31d -z 2 /etc/ssh/ca/user/taglio/id_ed25519.pub
-expect 	"Enter passphrase: "
-send "$password\r"
-send "\r"
+expect  "Enter passphrase: "
+sleep 5
+send "$asdf"
+interact
