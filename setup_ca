@@ -163,7 +163,7 @@ case $1 in
 		while [ -z $lhn ]
 		do
 			echo -n 'Type the local host name '
-			read -r lhn
+			read lhn
 		done
 		sed "s|/LHN/|$lhn|" "${CADIR}"/pattern.ext > "${CADIR}"/1.ext
 		openssl ca -batch -config "${CADIR}"/iked.cnf -in "${CADIR}"/certs/$2.csr -extensions req_ext -extfile "${CADIR}"/1.ext -out "${CADIR}"/certs/$2.crt
