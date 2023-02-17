@@ -160,6 +160,7 @@ case $1 in
 	;;
 	"ikedadd")
 		openssl req -new -nodes -keyout "${CADIR}"/private/$2.key -config "${CADIR}"/iked.cnf -out "${CADIR}"/certs/$2.csr
+		lhn=
 		while [ -z $lhn ]
 		do
 			echo -n 'Type the local host name '
