@@ -160,6 +160,12 @@ case $1 in
 	;;
 	"ikedadd")
 		openssl req -new -nodes -keyout "${CADIR}"/private/$2.key -config "${CADIR}"/iked.cnf -out "${CADIR}"/certs/$2.csr
+		while [ -z $lhn ]
+		do
+			echo -n 'Type the local host name '
+			read -r lhn
+		done
+		sed "s|/LHN/|$lhn|" "${CADIR}"/pattern.ext > "${CADIR}"/1.ext
 		openssl ca -batch -config "${CADIR}"/iked.cnf -in "${CADIR}"/certs/$2.csr -extensions req_ext -extfile "${CADIR}"/1.ext -out "${CADIR}"/certs/$2.crt
 		openssl x509 -in "${CADIR}"/certs/$2.crt -pubkey -out "${CADIR}"/certs/$2.pem > "${CADIR}"/public/$2.pub
 		rm -rf "${CADIR}"/certs/$2.csr
